@@ -1,0 +1,24 @@
+# Package Files #
+*.jar
+
+# IDEA config files
+.idea/
+.idea/libraries/Maven__javax_inject_javax_inject_1.xml
+.idea/libraries/Maven__org_apache_logging_log4j_log4j_api_2_8.xml
+.idea/libraries/Maven__org_apache_logging_log4j_log4j_core_2_8.xml
+.idea/libraries/Maven__org_apache_logging_log4j_log4j_slf4j_impl_2_8.xml
+.idea/libraries/Maven__org_aspectj_aspectjrt_1_6_11.xml
+.idea/libraries/Maven__org_aspectj_aspectjweaver_1_6_11.xml
+.idea/libraries/Maven__org_projectlombok_lombok_1_16_10.xml
+.idea/libraries/Maven__org_slf4j_jcl_over_slf4j_1_7_21.xml
+.idea/libraries/Maven__org_slf4j_slf4j_api_1_7_21.xml
+.idea/libraries/Maven__org_springframework_spring_aop_4_3_5_RELEASE.xml
+.idea/libraries/Maven__org_springframework_spring_beans_4_3_5_RELEASE.xml
+.idea/libraries/Maven__org_springframework_spring_context_4_3_5_RELEASE.xml
+.idea/libraries/Maven__org_springframework_spring_core_4_3_5_RELEASE.xml
+.idea/libraries/Maven__org_springframework_spring_expression_4_3_5_RELEASE.xml
+.idea/workspace.xml
+all.log
+app.log
+thesis-api/src/
+thesis-core/src/test/java/cz/osu/core/
