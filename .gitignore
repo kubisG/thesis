@@ -1,5 +1,7 @@
-# Package Files #
-*.jar
+# Targets #
+thesis-core/target
+thesis-ui/target
+thesis-api/target
 
 # IDEA config files
 .idea/

@@ -21,9 +21,9 @@
 
         <!-- INTERNAL PROJECT dependencies -->
         <dependency>
-            <groupId>${groupId}</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>thesis-api</artifactId>
-            <version>${version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <!-- Supports for the standard of Dependency injection for Java -->
@@ -129,6 +129,23 @@
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
+                </configuration>
+            </plugin>
+
+            <!-- In order that we need to run application via maven Run configuration command -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.2.1</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <mainClass>cz.osu.App</mainClass>
                 </configuration>
             </plugin>
         </plugins>
