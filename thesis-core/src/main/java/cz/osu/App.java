@@ -20,6 +20,7 @@ public class App
         InjectedClass injectedClass= (InjectedClass) context.getBean("injectedClass");
         Long tmp = injectedClass.dummy();
 
+
         System.out.println( "Hello World!" + tmp);
     }
 
