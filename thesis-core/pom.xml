@@ -19,12 +19,6 @@
 
     <dependencies>
 
-        <!--<dependency>
-            <groupId>com.lmax</groupId>
-            <artifactId>disruptor</artifactId>
-            <version>3.0.0.beta3</version>
-        </dependency>-->
-
         <!-- INTERNAL PROJECT dependencies -->
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -64,13 +58,13 @@
         <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjrt</artifactId>
-            <version>1.6.11</version>
+            <version>${aspectj.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjweaver</artifactId>
-            <version>1.6.11</version>
+            <version>${aspectj.version}</version>
         </dependency>
 
         <!-- LOGGING dependencies  -->
@@ -97,12 +91,6 @@
 
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-            <version>${log4j2.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
             <version>${log4j2.version}</version>
         </dependency>
@@ -115,21 +103,52 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+
         <!-- Mockito dependencies -->
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>1.9.5</version>
+            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-junit</artifactId>
-            <version>1.0.0.1</version>
+            <version>${hamcrest.version}</version>
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${assertj.version}</version>
+        </dependency>
+
+        <!-- SELENIUM dependencies -->
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-firefox-driver</artifactId>
+            <version>${selenium.firefox.driver.version}</version>
+        </dependency>
+
+        <!-- JAVAPARSER dependencies -->
+        <dependency>
+            <groupId>com.github.javaparser</groupId>
+            <artifactId>javaparser-core</artifactId>
+            <version>${javaparser.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.github.javaparser</groupId>
+            <artifactId>java-symbol-solver-core</artifactId>
+            <version>0.5.3</version>
+        </dependency>
 
         <!-- UTIL dependencies -->
         <!-- Lombok for automatic generation getters, setters and so on -->
@@ -137,6 +156,20 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
+        </dependency>
+
+        <!-- file utils - reading files etc. -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${apache.commons.io.version}</version>
+        </dependency>
+
+        <!-- generate hashcode and equals -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${apache.commons.lang3.version}</version>
         </dependency>
 
     </dependencies>
