@@ -7,6 +7,20 @@
        http://www.springframework.org/schema/context
 	   http://www.springframework.org/schema/context/spring-context.xsd">
 
+    <import resource="classpath:external-component-context.xml"/>
+    <import resource="classpath:locale-message-context.xml"/>
+
+    <bean id="messageSource"
+          class="org.springframework.context.support.ResourceBundleMessageSource">
+        <property name="basename">
+            <value>locale.exception.messages</value>
+        </property>
+    </bean>
+
     <context:component-scan base-package="cz.osu.core"/>
+
+    <!-- application start point which needs to be defined here because of getBean() method
+    called from main method (auto component scan is not working in this case) -->
+    <bean id="Composer" class="cz.osu.core.Composer"/>
 
 </beans>
