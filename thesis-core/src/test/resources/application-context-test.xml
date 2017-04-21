@@ -3,4 +3,16 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
+    <!-- import real classes -->
+    <import resource="classpath:application-context.xml"/>
+
+    <bean id="messageProperties"
+          class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+        <property name="locations">
+            <list>
+                <value>classpath*:test_messages.properties</value>
+            </list>
+        </property>
+    </bean>
+
 </beans>
