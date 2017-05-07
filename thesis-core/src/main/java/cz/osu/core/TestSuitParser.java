@@ -8,6 +8,7 @@ import com.github.javaparser.ast.nodeTypes.NodeWithArguments;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import cz.osu.core.enums.Annotations;
 import cz.osu.core.model.Method;
+import cz.osu.core.model.TestSuit;
 import cz.osu.core.model.Variable;
 import org.springframework.stereotype.Component;
 
@@ -26,7 +27,7 @@ public class TestSuitParser {
     private TestCaseParser testCaseParser;
 
     @Inject
-    private VariableParser variableParser;
+    private BindingResolver bindingResolver;
 
     /**
      * Represents java file with whole test suit. Provides fields, methods etc. as objects.
@@ -62,100 +63,11 @@ public class TestSuitParser {
         return compilationUnit.getChildNodesByType(FieldDeclaration.class);
     }
 
-    Method parseMethodCallExprToMethod(MethodCallExpr methodCallExpr) {
-        String methodName = methodCallExpr.getName().getIdentifier();
-        Method method = new Method();
+    /*public TestSuit parseTestSuit() {
 
-        method.setName(methodName);
-        setMethodParams(method, methodCallExpr);
+    }*/
 
-        return method;
-    }
 
-    private void setMethodParams(Method method, NodeWithArguments nodeWithArguments) {
-        List<Expression> arguments = nodeWithArguments.getArguments();
-
-        for (Expression argument: arguments) {
-            if (argument instanceof NodeWithArguments) {
-                Method methodTypeParam = new Method();
-                methodTypeParam.setName(getName(argument));
-                methodTypeParam.setType(getType(argument));
-                // recursive call
-                setMethodParams(methodTypeParam, (NodeWithArguments) argument);
-                method.addMethodTypeParameters(methodTypeParam);
-            } else {
-                method.addParameter(argument);
-                method.addParameterType(argument.getClass());
-            }
-        }
-    }
-
-    private Variable parseExpressionToVariable(Expression argument) {
-        if (argument instanceof LiteralExpr) {
-            return parseLiteralExprToVariable((LiteralExpr) argument);
-        } else if (argument instanceof NameExpr) {
-            return parseNameOrFieldExprToVariable();
-        } else if (argument instanceof BinaryExpr) {
-
-        } else if (argument instanceof FieldAccessExpr) {
-
-        }
-        throw new UnsupportedOperationException("Unable to parse expression argument");
-    }
-
-    private boolean isNameOrFiledExpr(Expression argument) {
-        return (argument instanceof NameExpr) || (argument instanceof FieldAccessExpr);
-    }
-    // TODO: 19. 4. 2017 bude volat resolve variable binding
-    private Variable parseNameOrFieldExprToVariable() {
-        return null;
-    }
-
-    // TODO: 19. 4. 2017 bude volat parseExpressionToVariable cili bude rekuzivni
-    private Variable parseBinaryExprToVariable(BinaryExpr argument) {
-        return null;
-    }
-
-    private Variable parseLiteralExprToVariable(LiteralExpr argument) {
-        if (argument instanceof NullLiteralExpr) {
-            return new Variable(null, null);
-        } else if (argument instanceof BooleanLiteralExpr) {
-            Boolean value = ((BooleanLiteralExpr) argument).getValue();
-            return new Variable(value, Boolean.class);
-        }
-        return parseLiteralValueExprToVariable(((LiteralStringValueExpr) argument));
-    }
-
-    private Variable parseLiteralValueExprToVariable(LiteralStringValueExpr argument) {
-        if (argument instanceof CharLiteralExpr) {
-            Character value = argument.getValue().charAt(0);
-            return new Variable(value, Character.class);
-        } else if (argument instanceof DoubleLiteralExpr) {
-            Double value = Double.valueOf(argument.getValue());
-            return new Variable(value, Double.class);
-        } else if (argument instanceof IntegerLiteralExpr) {
-            Integer value = Integer.valueOf(argument.getValue());
-            return new Variable(value, Integer.class);
-        } else if (argument instanceof  LongLiteralExpr) {
-            Long value = Long.valueOf(argument.getValue());
-            return new Variable(value, Long.class);
-        }
-        return new Variable(argument.getValue(), String.class);
-    }
-
-    private String getName(Expression argument) {
-        if (argument instanceof MethodCallExpr) {
-            return ((MethodCallExpr) argument).getName().getIdentifier();
-        }
-        return null;
-    }
-
-    private String getType(Expression argument) {
-        if (argument instanceof ObjectCreationExpr) {
-            return ((ObjectCreationExpr) argument).getType().getNameAsString();
-        }
-        return null;
-    }
 
     /*protected final List<Variable> initializeFields() {
         FieldSetterVisitor fvisitor = new FieldSetterVisitor();

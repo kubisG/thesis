@@ -24,6 +24,8 @@ public class BeforeMethod {
 
     public static final MethodDeclaration BEFORE_METHOD = buildBeforeMethod();
 
+    public static final BlockStmt BEFORE_METHOD_BODY = getBlockStmt();
+
     private static ExpressionStmt getFirstExpressionStmt(){
         Range range = new Range(new Position(20, 9), new Position(20, 37));
         final AssignExpr expression = TestUtil.getAssignExpr("driver", TestUtil.getObjectCreationExpr(range, null, "FirefoxDriver"));

@@ -20,6 +20,7 @@ import com.github.javaparser.ast.expr.ThisExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
+import com.github.javaparser.ast.stmt.IfStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 
@@ -30,6 +31,8 @@ import com.github.javaparser.ast.type.ClassOrInterfaceType;
 public class TestMethod {
 
     public static final MethodDeclaration TEST_METHOD = buildTestMethod();
+
+    public static final BlockStmt TEST_METHOD_BODY = getBlockStmt();
 
     private static ExpressionStmt getFirstStmt() {
         final Range range = new Range(new Position(27, 9), new Position(27, 32));
@@ -123,6 +126,12 @@ public class TestMethod {
         return new ExpressionStmt(expression);
     }
 
+    private static IfStmt getEighthStmt() {
+        // final Range range = new Range(new Position(33, 9), new Position(33, 64));
+
+        return new IfStmt();
+    }
+
     public static BlockStmt getBlockStmt() {
         final BlockStmt body = new BlockStmt();
 
@@ -135,6 +144,8 @@ public class TestMethod {
         statements.add(getFifthStmt());
         statements.add(getSixthStmt());
         statements.add(getSeventhStmt());
+        statements.add(getSeventhStmt());
+        statements.add(getEighthStmt());
         body.setStatements(statements);
 
         // set range

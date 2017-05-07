@@ -2,12 +2,20 @@ package cz.osu.core;
 
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.Name;
+import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithArguments;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import cz.osu.core.model.Method;
+import cz.osu.core.model.TestCase;
+import cz.osu.core.model.Variable;
+
 import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
 
 import java.util.List;
 
@@ -19,15 +27,15 @@ import java.util.List;
 @Component
 public class TestCaseParser {
 
+    @Inject
     private VariableParser variableParser;
 
-    private MethodDeclaration testCase;
+    @Inject
+    private BindingResolver bindingResolver;
 
-    public void setVariableParser(VariableParser variableParser) {
-        this.variableParser = variableParser;
-    }
+    private BlockStmt testCase;
 
-    public void setTestCase(MethodDeclaration testCase) {
+    public void setTestCase(BlockStmt testCase) {
         this.testCase = testCase;
     }
 
@@ -49,25 +57,47 @@ public class TestCaseParser {
         return null;
     }
 
+    private boolean isNameOrFieldAccessExpr(Expression argument) {
+        return argument instanceof NameExpr || argument instanceof FieldAccessExpr;
+    }
+
+    private void addMethodTypeParameter(Method method, Expression argument) {
+        Method methodTypeParam = new Method();
+        methodTypeParam.setName(getName(argument));
+        methodTypeParam.setType(getType(argument));
+
+        // recursive call
+        setMethodParams(methodTypeParam, (NodeWithArguments) argument);
+        method.addMethodTypeParameters(methodTypeParam);
+    }
+
+    private void addExpressionParameter(Method method, Expression argument, Expression argumentValue) {
+        if (argumentValue instanceof NodeWithArguments) {
+            addMethodTypeParameter(method, argumentValue);
+        } else {
+            Variable variable = variableParser.parse(argument);
+            method.addParameter(variable);
+        }
+    }
+
     private void setMethodParams(Method method, NodeWithArguments nodeWithArguments) {
         List<Expression> arguments = nodeWithArguments.getArguments();
 
         for (Expression argument: arguments) {
             if (argument instanceof NodeWithArguments) {
-                Method methodTypeParam = new Method();
-                methodTypeParam.setName(getName(argument));
-                methodTypeParam.setType(getType(argument));
-                // recursive call
-                setMethodParams(methodTypeParam, (NodeWithArguments) argument);
-                method.addMethodTypeParameters(methodTypeParam);
+                // contains recursive call
+                addMethodTypeParameter(method, argument);
+            } else if (isNameOrFieldAccessExpr(argument)) {
+                Expression argumentValue = bindingResolver.resolveBindings(argument);
+                addExpressionParameter(method, argument, argumentValue);
             } else {
-                method.addParameter(argument);
-                method.addParameterType(argument.getClass());
+                Variable variable = variableParser.parse(argument);
+                method.addParameter(variable);
             }
         }
     }
 
-    Method parseMethodCallExprToMethod(MethodCallExpr methodCallExpr) {
+    Method parseMethodCallExpr(MethodCallExpr methodCallExpr) {
         String methodName = methodCallExpr.getName().getIdentifier();
         Method method = new Method();
 
@@ -76,4 +106,10 @@ public class TestCaseParser {
 
         return method;
     }
+
+    TestCase parseTestCase() {
+        bindingResolver.setTestCase(testCase);
+        return null;
+    }
+
 }
