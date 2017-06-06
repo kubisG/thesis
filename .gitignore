@@ -23,4 +23,5 @@ thesis-api/target
 all.log
 app.log
 thesis-api/src/
-thesis-core/src/test/java/cz/osu/core/
+
+*.iml

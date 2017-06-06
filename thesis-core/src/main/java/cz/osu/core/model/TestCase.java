@@ -1,5 +1,8 @@
 package cz.osu.core.model;
 
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Queue;
 
 /**
@@ -8,13 +11,19 @@ import java.util.Queue;
  */
 public class TestCase {
 
-    private final Queue methods;
+    private Queue<Statement> statements = new LinkedList<>();
 
-    public TestCase(Queue methods) {
-        this.methods = methods;
+    public TestCase() {}
+
+    public TestCase(Queue statements) {
+        this.statements = statements;
     }
 
     public Queue getMethods() {
-        return methods;
+        return statements;
+    }
+
+    public void add(Statement statement) {
+        statements.add(statement);
     }
 }

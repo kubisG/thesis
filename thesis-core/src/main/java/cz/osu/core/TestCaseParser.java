@@ -1,46 +1,52 @@
 package cz.osu.core;
 
-import com.github.javaparser.ast.body.MethodDeclaration;
+import org.springframework.stereotype.Component;
+import sun.awt.image.ImageWatched;
+
+import javax.inject.Inject;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+import java.util.stream.Collectors;
+
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithArguments;
 import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.ast.stmt.ExpressionStmt;
+
 import cz.osu.core.model.Method;
+import cz.osu.core.model.Statement;
 import cz.osu.core.model.TestCase;
 import cz.osu.core.model.Variable;
-
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-
-import java.util.List;
 
 /**
  * Project: thesis
  * Created by Jakub on 12. 4. 2017.
  */
-
 @Component
 public class TestCaseParser {
 
-    @Inject
-    private VariableParser variableParser;
+    private final VariableParser variableParser;
+
+    private final BindingResolver bindingResolver;
 
     @Inject
-    private BindingResolver bindingResolver;
-
-    private BlockStmt testCase;
-
-    public void setTestCase(BlockStmt testCase) {
-        this.testCase = testCase;
+    public TestCaseParser(VariableParser variableParser, BindingResolver bindingResolver) {
+        this.variableParser = variableParser;
+        this.bindingResolver = bindingResolver;
     }
 
-    List<MethodCallExpr> filterMethodCallExpr(BlockStmt methodBody) {
-        return methodBody.getChildNodesByType(MethodCallExpr.class);
+    private <T extends Expression> List<T> getExpressionsByType(List<ExpressionStmt> statements, Class<T> type) {
+        return statements.stream()
+                .map(statement -> statement.getExpression())
+                .filter(expression -> type.isInstance(expression))
+                .map(expression -> (T) expression)
+                .collect(Collectors.toList());
     }
 
     private String getName(Expression argument) {
@@ -71,11 +77,11 @@ public class TestCaseParser {
         method.addMethodTypeParameters(methodTypeParam);
     }
 
-    private void addExpressionParameter(Method method, Expression argument, Expression argumentValue) {
+    private void addExpressionParameter(Method method, Expression argumentValue) {
         if (argumentValue instanceof NodeWithArguments) {
             addMethodTypeParameter(method, argumentValue);
         } else {
-            Variable variable = variableParser.parse(argument);
+            Variable variable = variableParser.parse(argumentValue);
             method.addParameter(variable);
         }
     }
@@ -89,7 +95,7 @@ public class TestCaseParser {
                 addMethodTypeParameter(method, argument);
             } else if (isNameOrFieldAccessExpr(argument)) {
                 Expression argumentValue = bindingResolver.resolveBindings(argument);
-                addExpressionParameter(method, argument, argumentValue);
+                addExpressionParameter(method, argumentValue);
             } else {
                 Variable variable = variableParser.parse(argument);
                 method.addParameter(variable);
@@ -97,19 +103,63 @@ public class TestCaseParser {
         }
     }
 
-    Method parseMethodCallExpr(MethodCallExpr methodCallExpr) {
-        String methodName = methodCallExpr.getName().getIdentifier();
+    private boolean isArgumentOfAnotherMethod(List<MethodCallExpr> methodCalls, MethodCallExpr methodCallExpr) {
+        return methodCalls.stream()
+                .flatMap(methodCall -> methodCall.getArguments().stream())
+                .filter(argument -> argument instanceof MethodCallExpr)
+                .anyMatch(methodCallArg -> methodCallArg.equals(methodCallExpr));
+    }
+
+    private List<MethodCallExpr> breakDownToSingleMethodCalls(MethodCallExpr methodCallExpr) {
+        List<MethodCallExpr> methodCalls = methodCallExpr.getChildNodesByType(MethodCallExpr.class);
+
+        // add parent method call as well
+        methodCalls.add(0, methodCallExpr);
+
+        return methodCalls.stream()
+                .filter(methodCall -> !isArgumentOfAnotherMethod(methodCalls, methodCall))
+                .collect(Collectors.toList());
+    }
+
+    private Method parseSingleMethodCallExpr(MethodCallExpr singleMethodCall) {
+        String methodName = singleMethodCall.getNameAsString();
         Method method = new Method();
 
         method.setName(methodName);
-        setMethodParams(method, methodCallExpr);
+        setMethodParams(method, singleMethodCall);
 
         return method;
     }
 
-    TestCase parseTestCase() {
-        bindingResolver.setTestCase(testCase);
-        return null;
+    Statement parseMethodCallExpr(MethodCallExpr methodCallExpr) {
+        Statement statement = new Statement();
+
+        // break down whole method call to single ones
+        List<MethodCallExpr> singleMethodCallExprs = breakDownToSingleMethodCalls(methodCallExpr);
+
+        // parse each single method to Method and collect them into Statement class
+        singleMethodCallExprs.stream()
+                .map(singleMethodCallExpr -> parseSingleMethodCallExpr(singleMethodCallExpr))
+                .forEach(statement::add);
+
+        return statement;
+    }
+
+    public TestCase parse(BlockStmt testBody) {
+        TestCase testCase = new TestCase();
+
+        // get only expression statements
+        List<ExpressionStmt> statements = testBody.getChildNodesByType(ExpressionStmt.class);
+
+        // get only method call expressions
+        List<MethodCallExpr> methodCallExprs = getExpressionsByType(statements, MethodCallExpr.class);
+
+        // parse method call expressions to statement and collect them into TestCase class
+        methodCallExprs.stream()
+                .map(methodCallExpr -> parseMethodCallExpr(methodCallExpr))
+                .forEach(testCase::add);
+
+        return testCase;
     }
 
 }

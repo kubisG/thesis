@@ -34,10 +34,20 @@ public class TestMethod {
 
     public static final BlockStmt TEST_METHOD_BODY = getBlockStmt();
 
+    private static ExpressionStmt getZeroStmt() {
+        final Range range = new Range(new Position(26, 9), new Position(26, 32));
+        final FieldAccessExpr target = new FieldAccessExpr(new ThisExpr(), "baseUrl");
+        final StringLiteralExpr value = new StringLiteralExpr(range, "urlFieldExpr");
+        final AssignExpr.Operator operator = AssignExpr.Operator.ASSIGN;
+        final AssignExpr expression = new AssignExpr(range, target, value, operator);
+
+        return new ExpressionStmt(expression);
+    }
+
     private static ExpressionStmt getFirstStmt() {
         final Range range = new Range(new Position(27, 9), new Position(27, 32));
         final ClassOrInterfaceType type = new ClassOrInterfaceType("String");
-        final StringLiteralExpr initializer = new StringLiteralExpr("some");
+        final StringLiteralExpr initializer = new StringLiteralExpr(range, "urlNameExpr1");
         final SimpleName name = new SimpleName("baseUrl");
 
         final VariableDeclarator variable = new VariableDeclarator(range, type, name, initializer);
@@ -49,7 +59,7 @@ public class TestMethod {
     private static ExpressionStmt getSecondStmt() {
         final Range range = new Range(new Position(28, 9), new Position(28, 26));
         final NameExpr target = new NameExpr("baseUrl");
-        final StringLiteralExpr value = new StringLiteralExpr("some2");
+        final StringLiteralExpr value = new StringLiteralExpr(range, "urlNameExpr2");
         final AssignExpr.Operator operator = AssignExpr.Operator.ASSIGN;
         final AssignExpr expression = new AssignExpr(range, target, value, operator);
 
@@ -60,11 +70,11 @@ public class TestMethod {
         final Range range = new Range(new Position(29, 9), new Position(29, 65));
         final MethodCallExpr expression = TestUtil.getMethodCallExpr(range, 
                 new NameExpr("driver"), "get",
-                new NameExpr("baseUrl"),
-                new StringLiteralExpr("stringLiteral"),
-                new CharLiteralExpr('c'),
-                new DoubleLiteralExpr(2.0),
-                new FieldAccessExpr(new ThisExpr(), "baseUrl")
+                new NameExpr(range, new SimpleName("baseUrl")),
+                new StringLiteralExpr(range,"stringLiteral"),
+                new CharLiteralExpr(range, "c"),
+                new DoubleLiteralExpr(range, "2.0"),
+                new FieldAccessExpr(range, new ThisExpr(), new NodeList<>(), new SimpleName("baseUrl"))
         );
 
         return new ExpressionStmt(expression);
@@ -120,16 +130,13 @@ public class TestMethod {
         // first method in chain
         final MethodCallExpr firstMethod = TestUtil.getMethodCallExpr(range, new NameExpr("driver"), "findElement", secondMethod);
 
+        // second method in chain
+        final MethodCallExpr thirdMethod = TestUtil.getMethodCallExpr(range, firstMethod, "click");
+
         // last method in chain
-        final MethodCallExpr expression = TestUtil.getMethodCallExpr(range, firstMethod, "click");
+        final MethodCallExpr expression = TestUtil.getMethodCallExpr(range, thirdMethod, "click", new StringLiteralExpr("dfsdfs") );
 
         return new ExpressionStmt(expression);
-    }
-
-    private static IfStmt getEighthStmt() {
-        // final Range range = new Range(new Position(33, 9), new Position(33, 64));
-
-        return new IfStmt();
     }
 
     public static BlockStmt getBlockStmt() {
@@ -137,6 +144,7 @@ public class TestMethod {
 
         // set statements
         final NodeList<Statement> statements = new NodeList<>();
+        statements.add(getZeroStmt());
         statements.add(getFirstStmt());
         statements.add(getSecondStmt());
         statements.add(getThirdStmt());
@@ -145,11 +153,10 @@ public class TestMethod {
         statements.add(getSixthStmt());
         statements.add(getSeventhStmt());
         statements.add(getSeventhStmt());
-        statements.add(getEighthStmt());
         body.setStatements(statements);
 
         // set range
-        Range range = new Range(new Position(26, 47), new Position(34, 5));
+        Range range = new Range(new Position(25, 47), new Position(34, 5));
         body.setRange(range);
 
         return body;

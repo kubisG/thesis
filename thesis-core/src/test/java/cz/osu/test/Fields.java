@@ -10,6 +10,7 @@ import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.expr.BooleanLiteralExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
@@ -37,7 +38,7 @@ public class Fields {
     private static FieldDeclaration getThirdField() {
         final Range range = new Range(new Position(15, 5), new Position(15, 43));
 
-        return getFieldDeclaration(range, "boolean", "acceptNextAlert", null);
+        return getFieldDeclaration(range, "boolean", "acceptNextAlert", new BooleanLiteralExpr(true));
     }
 
     private static FieldDeclaration getFourthField() {

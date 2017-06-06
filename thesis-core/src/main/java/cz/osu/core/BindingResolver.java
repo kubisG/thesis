@@ -13,9 +13,7 @@ import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.expr.AssignExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
-import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.expr.NameExpr;
-import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.nodeTypes.NodeWithVariables;
@@ -106,7 +104,6 @@ public class BindingResolver {
 
     private Expression findArgumentValueInVariableDeclarationExpressions(List<VariableDeclarationExpr> variableExpressions, String argumentName) {
         Expression value = null;
-
         Optional<VariableDeclarationExpr> optionalVariableExpr = filterByArgumentName(variableExpressions, argumentName).stream().findAny();
 
         if (optionalVariableExpr.isPresent()) {
@@ -115,7 +112,7 @@ public class BindingResolver {
         return value;
     }
 
-    private boolean isLocalVariable(Expression argument) {
+    boolean isLocalVariable(Expression argument) {
         String argumentName = ((NodeWithSimpleName) argument).getNameAsString();
         List<VariableDeclarationExpr> variableDeclarationExprs = testCase.getChildNodesByType(VariableDeclarationExpr.class);
 
@@ -124,8 +121,7 @@ public class BindingResolver {
         return optionalVariableExpr.isPresent();
     }
 
-    // TODO: 1. 5. 2017  
-    private Expression findLastValueBeforeUsage(List<Expression> possibleValues, Expression argument) {
+    Expression findLastValueBeforeUsage(List<Expression> possibleValues, Expression argument) {
         if (!argument.getRange().isPresent()) {
             throw new IllegalStateException("cannot resolve argument binding");
         }
@@ -134,7 +130,7 @@ public class BindingResolver {
 
         Optional<Expression> possibleArgValue = possibleValues.stream()
                 .filter(possibleValue -> possibleValue.getRange().isPresent())
-                .filter(value -> value.getRange().get().isAfter(argumentPosition))
+                .filter(value -> value.getRange().get().isBefore(argumentPosition))
                 .max(new ExpressionComparator());
 
         if (!possibleArgValue.isPresent()) {
@@ -144,7 +140,7 @@ public class BindingResolver {
         return possibleArgValue.get();
     }
 
-    private Expression findArgumentValueInFields(String argumentName) {
+    Expression findArgumentValueInFields(String argumentName) {
         Expression value = null;
 
         Optional<FieldDeclaration> optionalField = filterByArgumentName(fields, argumentName).stream().findAny();
@@ -155,27 +151,24 @@ public class BindingResolver {
         return value;
     }
 
-    private List<Expression> findArgumentValuesInBeforeMethod(String argumentName){
+    List<Expression> findArgumentValuesInBeforeMethod(String argumentName){
         List<AssignExpr> assignExprs = beforeMethod.getChildNodesByType(AssignExpr.class);
         return findArgumentValuesInAssignExpressions(assignExprs, argumentName);
     }
 
-    private List<Expression> findArgumentValuesInTestCase(String argumentName) {
+    List<Expression> findArgumentValuesInTestCase(String argumentName) {
         List<AssignExpr> assignExprs = testCase.getChildNodesByType(AssignExpr.class);
         return findArgumentValuesInAssignExpressions(assignExprs, argumentName);
     }
 
-    private List<Expression> findArgumentValuesInTestCase(String argumentName, Class<?> type) {
+    List<Expression> findArgumentValuesInTestCase(String argumentName, Class<?> type) {
         List<AssignExpr> assignExprs = testCase.getChildNodesByType(AssignExpr.class);
-        List<Expression> assignExprValues;
 
-        if (type.isInstance(NameExpr.class)) {
-            assignExprValues = findArgumentValuesInAssignExpressionsByType(assignExprs, NameExpr.class, argumentName);
+        if (type.isAssignableFrom(NameExpr.class)) {
+            return findArgumentValuesInAssignExpressionsByType(assignExprs, NameExpr.class, argumentName);
         } else {
-            assignExprValues = findArgumentValuesInAssignExpressionsByType(assignExprs, FieldAccessExpr.class, argumentName);
+            return findArgumentValuesInAssignExpressionsByType(assignExprs, FieldAccessExpr.class, argumentName);
         }
-
-        return assignExprValues;
     }
 
     List<Expression> resolveLocalVariableBindingsByType(NameExpr argument) {
@@ -212,8 +205,9 @@ public class BindingResolver {
         if (argument instanceof NameExpr) {
             return resolveLocalVariableBindingsByType((NameExpr) argument);
         }
-        else
+        else {
             return resolveLocalVariableBindingsByType((FieldAccessExpr) argument);
+        }
     }
 
     List<Expression> resolveGlobalVariableBindings(Expression argument) {
@@ -242,9 +236,6 @@ public class BindingResolver {
         } else {
             argumentValues = resolveGlobalVariableBindings(argument);
         }
-        // sort expression value by line number
-        argumentValues.sort(new ExpressionComparator());
-
         return findLastValueBeforeUsage(argumentValues, argument);
     }
 

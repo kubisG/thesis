@@ -1,5 +1,6 @@
 package cz.osu.core.model;
 
+import java.util.LinkedList;
 import java.util.Queue;
 
 /**
@@ -8,7 +9,10 @@ import java.util.Queue;
  */
 public class TestSuit {
 
-    private final Queue<TestCase> testCases;
+    private Queue<TestCase> testCases = new LinkedList<>();
+
+    public TestSuit() {
+    }
 
     public TestSuit(Queue<TestCase> testCases) {
         this.testCases = testCases;
