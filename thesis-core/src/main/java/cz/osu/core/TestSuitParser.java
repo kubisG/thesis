@@ -1,22 +1,23 @@
 package cz.osu.core;
 
-import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.body.FieldDeclaration;
-import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.expr.*;
-import com.github.javaparser.ast.nodeTypes.NodeWithArguments;
-import com.github.javaparser.ast.stmt.BlockStmt;
-import cz.osu.core.enums.Annotations;
-import cz.osu.core.model.Method;
-import cz.osu.core.model.TestCase;
-import cz.osu.core.model.TestSuit;
-import cz.osu.core.model.Variable;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
+
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 import java.util.stream.Collectors;
+
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.ImportDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.nodeTypes.NodeWithName;
+import com.github.javaparser.ast.stmt.BlockStmt;
+
+import cz.osu.core.enums.Annotations;
+import cz.osu.core.model.TestSuit;
+import cz.osu.core.util.ClassFinderUtils;
 
 /**
  * Project: thesis
@@ -24,6 +25,8 @@ import java.util.stream.Collectors;
  */
 @Component
 public class TestSuitParser {
+
+    private static final String MOCKED_JAR_LOCATION = "/C:/Users/Jakub/thesis/thesis-core/target/thesis-core-1.0-SNAPSHOT-jar-with-dependencies.jar";
 
     private final TestCaseParser testCaseParser;
 
@@ -76,12 +79,31 @@ public class TestSuitParser {
         return compilationUnit.getChildNodesByType(FieldDeclaration.class);
     }
 
+    private List<ImportDeclaration> getImports(CompilationUnit compilationUnit) {
+        return compilationUnit.getImports().stream()
+                .filter(imp -> !imp.isAsterisk())
+                .collect(Collectors.toList());
+    }
+
+    private List<String> getPackageNames(CompilationUnit compilationUnit) {
+        return compilationUnit.getImports().stream()
+                .filter(ImportDeclaration::isAsterisk)
+                .map(NodeWithName::getNameAsString)
+                .collect(Collectors.toList());
+    }
+
+    private Map<String, String> getAvailableClassNames(CompilationUnit compilationUnit) {
+        List<String> packageNames = getPackageNames(compilationUnit);
+        return ClassFinderUtils.getAvailableClassNames(MOCKED_JAR_LOCATION, packageNames);
+    }
+
     private boolean isTestIgnored(MethodDeclaration testCase) {
         return testCase.getAnnotationByName(Annotations.IGNORE.getValue()).isPresent();
     }
 
     public TestSuit parse(CompilationUnit compilationUnit) {
         TestSuit testSuit = new TestSuit();
+
 
         // get test cases for current test suit
         List<BlockStmt> testCases = getTestCases(compilationUnit);
@@ -90,6 +112,8 @@ public class TestSuitParser {
         bindingResolver.setFields(getFields(compilationUnit));
         bindingResolver.setBeforeMethod(getSetUpMethod(compilationUnit, Annotations.BEFORE));
         bindingResolver.setBeforeClassMethod(getSetUpMethod(compilationUnit, Annotations.BEFORE_CLASS));
+        bindingResolver.setImports(getImports(compilationUnit));
+        bindingResolver.setClassNames(getAvailableClassNames(compilationUnit));
 
         // parse all test cases
         for (BlockStmt testCase : testCases) {

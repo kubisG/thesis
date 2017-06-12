@@ -4,10 +4,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
 /**
  * Project: thesis
  * Created by Jakub on 17. 4. 2017.
@@ -16,7 +12,7 @@ public class Method {
 
     private String name;
 
-    private String type;
+    private Scope scope;
 
     private List<Variable> parameters = new LinkedList<>();
 
@@ -30,12 +26,12 @@ public class Method {
         this.name = name;
     }
 
-    public String getType() {
-        return type;
+    public Scope getScope() {
+        return scope;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setScope(Scope scope) {
+        this.scope = scope;
     }
 
     public List<Object> getParameterValues() {

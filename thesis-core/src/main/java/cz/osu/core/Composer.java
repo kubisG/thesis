@@ -20,7 +20,7 @@ public class Composer {
     private FileProvider fileProvider;
 
     public void run() throws FileProviderException {
-        fileLoader.setFiles(fileProvider.getFilesFromDirectory("/"));
+        //fileLoader.setFiles(fileProvider.getFilesFromDirectory("/"));
     }
 
 }

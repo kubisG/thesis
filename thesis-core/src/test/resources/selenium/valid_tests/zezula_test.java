@@ -6,7 +6,7 @@ import org.junit.*;
 import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
 import org.openqa.selenium.*;
-import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.*;
 import org.openqa.selenium.support.ui.Select;
 
 public class ZezulaTest {
@@ -26,10 +26,9 @@ public class ZezulaTest {
     public void testZezula() throws Exception {
         String baseUrl = "some";
         baseUrl = "some2";
-        driver.get(baseUrl, "sdfs", 's', 2.0, 123, this.baseUrl);
+        driver.get(baseUrl, "sdfs", 's', 2.0, 123);
         driver.findElement(By.linkText("Street bundy")).click();
         driver.findElement(By.id("productbox-63065-image")).click();
-        new Select(driver.findElement(By.id("product-size-select"))).selectByVisibleText("M, skladem");
         driver.findElement(By.id("frmcartAddForm-add")).click();
     }
 

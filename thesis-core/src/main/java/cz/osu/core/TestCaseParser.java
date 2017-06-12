@@ -1,25 +1,29 @@
 package cz.osu.core;
 
 import org.springframework.stereotype.Component;
-import sun.awt.image.ImageWatched;
 
 import javax.inject.Inject;
 
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithArguments;
+import com.github.javaparser.ast.nodeTypes.NodeWithOptionalScope;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
+import com.github.javaparser.ast.stmt.IfStmt;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
 
+import cz.osu.core.enums.ScopeType;
 import cz.osu.core.model.Method;
+import cz.osu.core.model.Scope;
 import cz.osu.core.model.Statement;
 import cz.osu.core.model.TestCase;
 import cz.osu.core.model.Variable;
@@ -56,51 +60,107 @@ public class TestCaseParser {
         return null;
     }
 
-    private String getType(Expression argument) {
-        if (argument instanceof ObjectCreationExpr) {
-            return ((ObjectCreationExpr) argument).getType().getNameAsString();
+    private Scope parseScope(String scopeExprName, ScopeType scopeType) {
+        Scope scope = new Scope(scopeType);
+
+        Class<?> scopeClass = bindingResolver.resolveScopeClass(scopeExprName);
+        scope.setScopeClass(scopeClass);
+
+        return scope;
+    }
+
+    private Scope parseNameExprScope(NameExpr scopeExpr) {
+        String scopeExprName = scopeExpr.getNameAsString();
+        return parseScope(scopeExprName, ScopeType.CLASS);
+    }
+
+    private Scope parseObjectCreationExprScope(ObjectCreationExpr scopeExpr) {
+        String scopeExprName = scopeExpr.getType().getNameAsString();
+        return parseScope(scopeExprName, ScopeType.NEW_CLASS_INSTANCE);
+    }
+
+    private Scope parseFieldAccessExprScope(FieldAccessExpr scopeExpr) {
+        String scopeExprName = scopeExpr.getNameAsString();
+        return parseScope(scopeExprName, ScopeType.CLASS);
+    }
+
+    private Scope getScope(MethodCallExpr expression) {
+        if (!expression.getScope().isPresent()) {
+            throw new UnsupportedOperationException("Method scope missing");
         }
-        return null;
+        Scope scope = null;
+        Expression scopeExpr = expression.getScope().get();
+        String scopeClassName = scopeExpr.getClass().getSimpleName();
+
+        switch (scopeClassName) {
+            case "MethodCallExpr":
+                scope = new Scope(ScopeType.CLASS_INSTANCE);
+                break;
+            case "NameExpr":
+                scope = parseNameExprScope((NameExpr) scopeExpr);
+                break;
+            case "FieldAccessExpr":
+                scope = parseFieldAccessExprScope((FieldAccessExpr) scopeExpr);
+                break;
+            case "ObjectCreationExpr":
+                scope = parseObjectCreationExprScope((ObjectCreationExpr) scopeExpr);
+                break;
+        }
+        return scope;
     }
 
     private boolean isNameOrFieldAccessExpr(Expression argument) {
         return argument instanceof NameExpr || argument instanceof FieldAccessExpr;
     }
 
-    private void addMethodTypeParameter(Method method, Expression argument) {
-        Method methodTypeParam = new Method();
-        methodTypeParam.setName(getName(argument));
-        methodTypeParam.setType(getType(argument));
+    private void addLiteralParameter(Method method, Expression argument) {
+        Variable variable = variableParser.parse(argument);
+        method.addParameter(variable);
+    }
 
-        // recursive call
-        setMethodParams(methodTypeParam, (NodeWithArguments) argument);
+    private void addMethodCallParameter(Method method, MethodCallExpr argument) {
+        Method methodTypeParam = new Method();
+
+        resolveScopeForMethodCallExpr(argument);
+        methodTypeParam.setName(getName(argument));
+        methodTypeParam.setScope(getScope(argument));
+        addMethodParameters(methodTypeParam, argument);
         method.addMethodTypeParameters(methodTypeParam);
     }
 
-    private void addExpressionParameter(Method method, Expression argumentValue) {
-        if (argumentValue instanceof NodeWithArguments) {
-            addMethodTypeParameter(method, argumentValue);
-        } else {
-            Variable variable = variableParser.parse(argumentValue);
-            method.addParameter(variable);
+    private void addObjectCreationParameter(Method method, ObjectCreationExpr argument) {
+        Method methodTypeParam = new Method();
+
+        methodTypeParam.setName(getName(argument));
+        methodTypeParam.setScope(parseObjectCreationExprScope(argument));
+        addMethodParameters(methodTypeParam, argument);
+        method.addMethodTypeParameters(methodTypeParam);
+    }
+
+    private void addMethodParameter(Method method, Expression argument) {
+        String scopeClassName = argument.getClass().getSimpleName();
+
+        switch (scopeClassName) {
+            case "MethodCallExpr":
+                addMethodCallParameter(method, (MethodCallExpr) argument);
+                break;
+            case "ObjectCreationExpr":
+                addObjectCreationParameter(method, (ObjectCreationExpr) argument);
+                break;
+            case "NameExpr":
+                addMethodParameter(method, bindingResolver.resolveBindings(argument));
+                break;
+            case "FieldAccessExpr":
+                addMethodParameter(method, bindingResolver.resolveBindings(argument));
+                break;
+            default:
+                addLiteralParameter(method, argument);
         }
     }
 
-    private void setMethodParams(Method method, NodeWithArguments nodeWithArguments) {
+    private void addMethodParameters(Method method, NodeWithArguments nodeWithArguments) {
         List<Expression> arguments = nodeWithArguments.getArguments();
-
-        for (Expression argument: arguments) {
-            if (argument instanceof NodeWithArguments) {
-                // contains recursive call
-                addMethodTypeParameter(method, argument);
-            } else if (isNameOrFieldAccessExpr(argument)) {
-                Expression argumentValue = bindingResolver.resolveBindings(argument);
-                addExpressionParameter(method, argumentValue);
-            } else {
-                Variable variable = variableParser.parse(argument);
-                method.addParameter(variable);
-            }
-        }
+        arguments.forEach(argument -> addMethodParameter(method, argument));
     }
 
     private boolean isArgumentOfAnotherMethod(List<MethodCallExpr> methodCalls, MethodCallExpr methodCallExpr) {
@@ -121,12 +181,37 @@ public class TestCaseParser {
                 .collect(Collectors.toList());
     }
 
+    private void resolveScopeForMethodCallExpr(MethodCallExpr singleMethodCallExpr) {
+        Expression scopeExpr = singleMethodCallExpr.getScope().orElse(null);
+
+        if(scopeExpr == null) {
+            throw new IllegalStateException("Method must have scope");
+        }
+
+        if (isNameOrFieldAccessExpr(scopeExpr)) {
+            Expression resolvedScopeExpr = bindingResolver.resolveBindings(scopeExpr);
+            if (resolvedScopeExpr == null) {
+                singleMethodCallExpr.setScope(scopeExpr);
+            } else if (resolvedScopeExpr instanceof ObjectCreationExpr) {
+                singleMethodCallExpr.setScope(resolvedScopeExpr);
+            } else if (resolvedScopeExpr instanceof MethodCallExpr) {
+                singleMethodCallExpr.setScope(resolvedScopeExpr);
+                resolveScopeForMethodCallExpr((MethodCallExpr) resolvedScopeExpr);
+            }
+        }
+    }
+
+    private void resolveScopeForMethodCallExprs(List<MethodCallExpr> singleMethodCallExprs) {
+        singleMethodCallExprs
+                .forEach(singleMethodCallExpr -> resolveScopeForMethodCallExpr(singleMethodCallExpr));
+    }
+
     private Method parseSingleMethodCallExpr(MethodCallExpr singleMethodCall) {
-        String methodName = singleMethodCall.getNameAsString();
         Method method = new Method();
 
-        method.setName(methodName);
-        setMethodParams(method, singleMethodCall);
+        method.setName(getName(singleMethodCall));
+        method.setScope(getScope(singleMethodCall));
+        addMethodParameters(method, singleMethodCall);
 
         return method;
     }
@@ -136,7 +221,8 @@ public class TestCaseParser {
 
         // break down whole method call to single ones
         List<MethodCallExpr> singleMethodCallExprs = breakDownToSingleMethodCalls(methodCallExpr);
-
+        // resolve scope for each method call
+        resolveScopeForMethodCallExprs(singleMethodCallExprs);
         // parse each single method to Method and collect them into Statement class
         singleMethodCallExprs.stream()
                 .map(singleMethodCallExpr -> parseSingleMethodCallExpr(singleMethodCallExpr))

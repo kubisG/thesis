@@ -4,14 +4,9 @@ import cz.osu.test.BeforeMethod;
 import cz.osu.test.Fields;
 import cz.osu.test.TestMethod;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.interactions.Action;
-import org.openqa.selenium.interactions.Actions;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -21,9 +16,7 @@ import java.io.FileNotFoundException;
 import java.util.List;
 
 import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.stmt.ExpressionStmt;
 
-import cz.osu.core.model.Statement;
 import cz.osu.core.model.TestCase;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,9 +38,6 @@ public class TestCaseParserTest {
 
     @Before
     public void setUp() throws FileNotFoundException {
-        // set up TestCaseParser
-        testCaseParser.setTestCase(TestMethod.TEST_METHOD_BODY);
-
         // set up BindingResolver
         bindingResolver.setFields(Fields.FIELDS);
         bindingResolver.setBeforeMethod(BeforeMethod.BEFORE_METHOD_BODY);
@@ -55,25 +45,16 @@ public class TestCaseParserTest {
     }
 
     @Test
+    @Ignore
     public void testTestCaseParserShouldParseMethodCallExpr() {
         // prepare
         List<MethodCallExpr> expectedResult = null;
-        ExpressionStmt expressionStmt = (ExpressionStmt) TestMethod.TEST_METHOD_BODY.getStatements().get(7);
-        MethodCallExpr methodCall = (MethodCallExpr) expressionStmt.getExpression();
 
         // execute
-        Statement actualResult = testCaseParser.parseMethodCall(methodCall);
+        TestCase actualResult = testCaseParser.parse(TestMethod.TEST_METHOD_BODY);
 
         // verify
         assertThat(actualResult).isEqualTo(null);
     }
 
-    @Test
-    public void testTestCaseParserShouldParseMethodBody() {
-        // execute
-        TestCase actualResult = testCaseParser.parseTestCase();
-
-        // verify
-        assertThat(actualResult).isEqualTo(null);
-    }
 }

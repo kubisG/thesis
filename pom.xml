@@ -41,7 +41,7 @@
 
     <!-- LOGGING -->
     <slf4j.version>1.7.21</slf4j.version>
-    <log4j2.version>2.8</log4j2.version>
+    <log4j2.version>2.8.1</log4j2.version>
 
     <!-- SELENIUM -->
     <selenium.firefox.driver.version>3.4.0</selenium.firefox.driver.version>

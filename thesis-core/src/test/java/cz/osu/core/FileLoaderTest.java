@@ -15,6 +15,7 @@ import cz.osu.core.exception.FileExceptionParams;
 import cz.osu.core.exception.FileLoaderException;
 import cz.osu.core.model.Position;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
@@ -67,6 +68,7 @@ public class FileLoaderTest {
     }
 
     @Test
+    @Ignore
     public void testLoaderShouldThrowFileLoaderExceptionWithCorrectMessageIfParsingFileCauseError() throws Exception {
         // prepare
         final String fileName = "/invalid_selenium_test1.java";
