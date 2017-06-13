@@ -7,7 +7,7 @@ import java.util.Queue;
  * Project: thesis
  * Created by Jakub on 22. 4. 2017.
  */
-public class Statement {
+public class Statement extends Parameter {
 
     private Queue<Method> methods = new LinkedList<>();
 

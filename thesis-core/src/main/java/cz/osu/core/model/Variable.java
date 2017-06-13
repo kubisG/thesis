@@ -13,7 +13,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  *
  * Generic model class which represents field or variable.
  */
-public class Variable {
+public class Variable extends Parameter{
 
     private final String name;
     private final Object value;

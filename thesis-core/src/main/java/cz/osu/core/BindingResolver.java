@@ -4,21 +4,16 @@ import org.springframework.stereotype.Component;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.github.javaparser.Position;
-import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.expr.AssignExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.NameExpr;
-import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.nodeTypes.NodeWithVariables;
@@ -34,10 +29,6 @@ import cz.osu.core.util.ExpressionComparator;
 @Component
 public class BindingResolver {
 
-    private static final String FULLY_QUALIFIED_NAME_REGEX = "([a-zA-Z_$][a-zA-Z\\d_$]*\\.)+[a-zA-Z_$][a-zA-Z\\d_$]*";
-
-    private static final Pattern FULLY_QUALIFIED_NAME_PATTERN = Pattern.compile(FULLY_QUALIFIED_NAME_REGEX);
-
     private BlockStmt testCase;
 
     private BlockStmt beforeMethod;
@@ -45,14 +36,6 @@ public class BindingResolver {
     private BlockStmt beforeClassMethod;
 
     private List<FieldDeclaration> fields;
-
-    private List<ImportDeclaration> imports;
-    
-    private Map<String, String> availableClassNames;
-
-    public void setClassNames(Map<String, String> classNames) {
-        this.availableClassNames = classNames;
-    }
 
     public void setTestCase(BlockStmt testCase) {
         this.testCase = testCase;
@@ -70,13 +53,8 @@ public class BindingResolver {
         this.fields = fields;
     }
 
-    public void setImports(List<ImportDeclaration> imports) {
-        this.imports = imports;
-    }
-
     private <T extends Node> Expression getArgumentValue(NodeWithVariables<T> nodeWithVariables) {
         Expression value = null;
-
         // all variables has the same initialization value e.g. int a, b, c = 10;
         Optional<Expression> optionalValue = nodeWithVariables.getVariables().get(0).getInitializer();
 
@@ -142,6 +120,10 @@ public class BindingResolver {
         return optionalVariableExpr.isPresent();
     }
 
+    private boolean isNameOrFieldAccessExpr(Expression argument) {
+        return argument instanceof NameExpr || argument instanceof FieldAccessExpr;
+    }
+
     Expression findLastValueBeforeUsage(List<Expression> possibleValues, Expression argument) {
         if (!argument.getRange().isPresent()) {
             throw new IllegalStateException("cannot resolve argument binding");
@@ -159,7 +141,6 @@ public class BindingResolver {
 
     Expression findArgumentValueInFields(String argumentName) {
         Expression value = null;
-
         Optional<FieldDeclaration> optionalField = filterByArgumentName(fields, argumentName).stream().findAny();
 
         if (optionalField.isPresent()) {
@@ -191,13 +172,12 @@ public class BindingResolver {
     List<Expression> resolveLocalVariableBindingsByType(NameExpr argument) {
         String argumentName = argument.getNameAsString();
         List<VariableDeclarationExpr> variableDeclarationExprs = testCase.getChildNodesByType(VariableDeclarationExpr.class);
-
         Expression variableExprValue = findArgumentValueInVariableDeclarationExpressions(variableDeclarationExprs, argumentName);
-
         List<Expression> assignExprValues = findArgumentValuesInTestCase(argumentName, NameExpr.class);
 
-        assignExprValues.add(variableExprValue);
-
+        if (variableExprValue != null) {
+            assignExprValues.add(variableExprValue);
+        }
         return assignExprValues;
     }
 
@@ -244,7 +224,7 @@ public class BindingResolver {
         return argumentValues;
     }
 
-    public Expression resolveBindings(Expression argument){
+    Expression resolveBinding(Expression argument){
         boolean localVariable = isLocalVariable(argument);
         List<Expression> argumentValues;
 
@@ -256,39 +236,16 @@ public class BindingResolver {
         return findLastValueBeforeUsage(argumentValues, argument);
     }
 
-    private boolean isFullyQualifiedName(String scopeClassName) {
-        Matcher matcher = FULLY_QUALIFIED_NAME_PATTERN.matcher(scopeClassName);
-        return matcher.matches();
-    }
+    public Expression resolveExpressionBinding(Expression expression) {
+        Expression resolvedScopeExpression = expression;
 
-    private Optional<String> findScopeClassNameInImports(String scopeClassName) {
-        return imports.stream()
-                .map(impt -> impt.getNameAsString())
-                .filter(importName -> importName.contains(scopeClassName))
-                .findFirst();
-    }
-
-    private String findScopeClassNameInJar(String scopeClassName) {
-        return availableClassNames.get(scopeClassName);
-    }
-
-    public Class<?> resolveScopeClass(String scopeExprName) {
-        Optional<String> tmpScopeClassName;
-        String scopeClassName;
-
-        if (isFullyQualifiedName(scopeExprName)) {
-            scopeClassName = scopeExprName;
-        } else if ((tmpScopeClassName = findScopeClassNameInImports(scopeExprName)).isPresent()) {
-            scopeClassName = tmpScopeClassName.get();
-        } else {
-            scopeClassName = findScopeClassNameInJar(scopeExprName);
+        while (isNameOrFieldAccessExpr(resolvedScopeExpression)) {
+            Expression tmpExpr =  resolveBinding(resolvedScopeExpression);
+            if (tmpExpr == null) {
+                return resolvedScopeExpression;
+            }
+            resolvedScopeExpression = tmpExpr;
         }
-
-        try {
-            return Class.forName(scopeClassName);
-        } catch (ClassNotFoundException e) {
-            throw new UnsupportedOperationException("Cannot find class for scope");
-        }
+        return resolvedScopeExpression;
     }
-
 }

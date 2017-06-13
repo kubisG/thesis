@@ -14,9 +14,7 @@ public class Method {
 
     private Scope scope;
 
-    private List<Variable> parameters = new LinkedList<>();
-
-    private List<Method> methodTypeParameters = new LinkedList<>();
+    private List<Parameter> parameters = new LinkedList<>();
 
     public String getName() {
         return name;
@@ -34,28 +32,8 @@ public class Method {
         this.scope = scope;
     }
 
-    public List<Object> getParameterValues() {
-        return parameters.stream()
-                .map(Variable::getValue)
-                .collect(Collectors.toList());
-    }
-
-    public List<Class> getParameterTypes() {
-        return parameters.stream()
-                .map(Variable::getType)
-                .collect(Collectors.toList());
-    }
-
-    public List<Method> getMethodTypeParameters() {
-        return methodTypeParameters;
-    }
-
-    public void addParameter(Variable parameter) {
+    public void addParameter(Parameter parameter) {
         parameters.add(parameter);
-    }
-
-    public void addMethodTypeParameters(Method method) {
-        methodTypeParameters.add(method);
     }
 
 }

@@ -28,14 +28,19 @@ public class TestSuitParser {
 
     private static final String MOCKED_JAR_LOCATION = "/C:/Users/Jakub/thesis/thesis-core/target/thesis-core-1.0-SNAPSHOT-jar-with-dependencies.jar";
 
+    private static final String DEFAULT_JAVA_PACKAGE = "java.lang";
+
     private final TestCaseParser testCaseParser;
 
     private final BindingResolver bindingResolver;
 
+    private final ClassResolver classResolver;
+
     @Inject
-    public TestSuitParser(TestCaseParser testCaseParser, BindingResolver bindingResolver) {
+    public TestSuitParser(TestCaseParser testCaseParser, BindingResolver bindingResolver, ClassResolver classResolver) {
         this.testCaseParser = testCaseParser;
         this.bindingResolver = bindingResolver;
+        this.classResolver = classResolver;
     }
 
     /**
@@ -68,7 +73,6 @@ public class TestSuitParser {
         if (setUpMethods.size() > 1){
             throw new IllegalStateException("Test suit must not have more than one set up method");
         }
-
         if(setUpMethods.isEmpty() || !setUpMethods.get(0).getBody().isPresent()) {
             return new BlockStmt();
         }
@@ -94,6 +98,7 @@ public class TestSuitParser {
 
     private Map<String, String> getAvailableClassNames(CompilationUnit compilationUnit) {
         List<String> packageNames = getPackageNames(compilationUnit);
+        packageNames.add(DEFAULT_JAVA_PACKAGE);
         return ClassFinderUtils.getAvailableClassNames(MOCKED_JAR_LOCATION, packageNames);
     }
 
@@ -103,17 +108,15 @@ public class TestSuitParser {
 
     public TestSuit parse(CompilationUnit compilationUnit) {
         TestSuit testSuit = new TestSuit();
-
-
         // get test cases for current test suit
         List<BlockStmt> testCases = getTestCases(compilationUnit);
-
         // set up binding resolver
         bindingResolver.setFields(getFields(compilationUnit));
         bindingResolver.setBeforeMethod(getSetUpMethod(compilationUnit, Annotations.BEFORE));
         bindingResolver.setBeforeClassMethod(getSetUpMethod(compilationUnit, Annotations.BEFORE_CLASS));
-        bindingResolver.setImports(getImports(compilationUnit));
-        bindingResolver.setClassNames(getAvailableClassNames(compilationUnit));
+        // set up class resolver
+        classResolver.setImports(getImports(compilationUnit));
+        classResolver.setAvailableClassNames(getAvailableClassNames(compilationUnit));
 
         // parse all test cases
         for (BlockStmt testCase : testCases) {

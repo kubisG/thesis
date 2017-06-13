@@ -26,10 +26,16 @@ public class ZezulaTest {
     public void testZezula() throws Exception {
         String baseUrl = "some";
         baseUrl = "some2";
-        driver.get(baseUrl, "sdfs", 's', 2.0, 123);
-        driver.findElement(By.linkText("Street bundy")).click();
-        driver.findElement(By.id("productbox-63065-image")).click();
-        driver.findElement(By.id("frmcartAddForm-add")).click();
+        String s;
+        String k = baseUrl.toLowerCase();
+        s = k;
+        this.baseUrl = null;
+        s.toLowerCase();
+        driver.get(baseUrl, "sdfs", 's', 2.0, 123, this.baseUrl);
+        driver.get(new FirefoxDriver(baseUrl.toLowerCase())).click();
+        driver.findElement(By.linkText("Street bundy").click()).click();
+        driver.findElement(By.id(By.linkText("Street bundy"))).click().click();
+        driver.findElement(By.id(baseUrl)).click();
     }
 
   @After

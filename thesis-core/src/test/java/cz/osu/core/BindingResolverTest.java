@@ -336,7 +336,7 @@ public class BindingResolverTest {
         final Expression expectedValue = new StringLiteralExpr("urlNameExpr2");
 
         // execute
-        Expression actualValue = bindingResolver.resolveBindings(argument);
+        Expression actualValue = bindingResolver.resolveBinding(argument);
 
         // verify
         assertThat(actualValue).isEqualTo(expectedValue);
@@ -350,7 +350,7 @@ public class BindingResolverTest {
         final Expression expectedValues = new StringLiteralExpr("urlFieldExpr");
 
         // execute
-        Expression actualValue = bindingResolver.resolveBindings(argument);
+        Expression actualValue = bindingResolver.resolveBinding(argument);
 
         // verify
         assertThat(actualValue).isEqualTo(expectedValues);
@@ -370,7 +370,7 @@ public class BindingResolverTest {
         final StringLiteralExpr expectedValue = new StringLiteralExpr("urlNameExpr2");
 
         // execute
-        Expression actualValue = bindingResolver.resolveBindings(argument);
+        Expression actualValue = bindingResolver.resolveBinding(argument);
 
         // verify
         assertThat(actualValue).isEqualTo(expectedValue);
@@ -391,7 +391,7 @@ public class BindingResolverTest {
         final Expression expectedValue = new StringLiteralExpr("urlNameExpr2");
 
         // execute
-        Expression actualValue = bindingResolver.resolveBindings(argument);
+        Expression actualValue = bindingResolver.resolveBinding(argument);
 
         // verify
         assertThat(actualValue).isEqualTo(expectedValue);
