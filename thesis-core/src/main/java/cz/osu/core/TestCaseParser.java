@@ -6,21 +6,15 @@ import javax.inject.Inject;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.Expression;
-import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithArguments;
-import com.github.javaparser.ast.nodeTypes.NodeWithOptionalScope;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
-import com.github.javaparser.ast.stmt.IfStmt;
-import com.github.javaparser.ast.type.ClassOrInterfaceType;
 
 import cz.osu.core.enums.ExpressionType;
 import cz.osu.core.enums.ScopeType;
@@ -189,6 +183,8 @@ public class TestCaseParser {
 
     Statement parseMethodCallExpr(MethodCallExpr methodCallExpr) {
         Statement statement = new Statement();
+        // resolve method call scope
+        resolveScopeForMethodCallExpr(methodCallExpr);
         // break down whole method call to single ones
         List<MethodCallExpr> singleMethodCallExprs = breakDownToSingleMethodCalls(methodCallExpr);
         // parse each single method to Method and collect them into Statement class
@@ -212,5 +208,4 @@ public class TestCaseParser {
 
         return testCase;
     }
-
 }
