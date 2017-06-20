@@ -14,10 +14,10 @@ import org.springframework.stereotype.Component;
 public class Composer {
 
     @Inject
-    private FileLoader fileLoader;
+    private TestSuitLoader testSuitLoader;
 
     @Inject
-    private FileProvider fileProvider;
+    private TestSuitsProvider testSuitsProvider;
 
     public void run() throws FileProviderException {
         //fileLoader.setFiles(fileProvider.getFilesFromDirectory("/"));

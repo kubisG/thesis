@@ -1,4 +1,4 @@
-package cz.osu.core;
+package cz.osu.core.parser;
 
 import org.springframework.stereotype.Component;
 
@@ -17,6 +17,9 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 
 import cz.osu.core.enums.Annotations;
 import cz.osu.core.model.TestSuit;
+import cz.osu.core.parser.TestCaseParser;
+import cz.osu.core.resolver.BindingResolver;
+import cz.osu.core.resolver.ClassResolver;
 import cz.osu.core.util.ClassFinderUtils;
 
 /**
@@ -27,8 +30,6 @@ import cz.osu.core.util.ClassFinderUtils;
 public class TestSuitParser {
 
     private static final String MOCKED_JAR_LOCATION = "/C:/Users/Jakub/thesis/thesis-core/target/thesis-core-1.0-SNAPSHOT-jar-with-dependencies.jar";
-
-    private static final String DEFAULT_JAVA_PACKAGE = "java.lang";
 
     private final TestCaseParser testCaseParser;
 
@@ -98,7 +99,6 @@ public class TestSuitParser {
 
     private Map<String, String> getAvailableClassNames(CompilationUnit compilationUnit) {
         List<String> packageNames = getPackageNames(compilationUnit);
-        packageNames.add(DEFAULT_JAVA_PACKAGE);
         return ClassFinderUtils.getAvailableClassNames(MOCKED_JAR_LOCATION, packageNames);
     }
 
@@ -111,6 +111,7 @@ public class TestSuitParser {
         // get test cases for current test suit
         List<BlockStmt> testCases = getTestCases(compilationUnit);
         // set up binding resolver
+        bindingResolver.clearCache();
         bindingResolver.setFields(getFields(compilationUnit));
         bindingResolver.setBeforeMethod(getSetUpMethod(compilationUnit, Annotations.BEFORE));
         bindingResolver.setBeforeClassMethod(getSetUpMethod(compilationUnit, Annotations.BEFORE_CLASS));

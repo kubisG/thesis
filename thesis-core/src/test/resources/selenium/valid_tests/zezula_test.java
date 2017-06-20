@@ -1,5 +1,6 @@
 package selenium;
 
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.concurrent.TimeUnit;
 import org.junit.*;
@@ -25,15 +26,13 @@ public class ZezulaTest {
     @Test
     public void testZezula() throws Exception {
         String baseUrl = "some";
-        baseUrl = "some2";
-        String s;
-        String k = baseUrl.toLowerCase();
-        s = k;
-        this.baseUrl = null;
-        s.toLowerCase();
-        driver.get(baseUrl, "sdfs", 's', 2.0, 123, this.baseUrl);
+        Integer a = FirefoxDriver.Timeouts();
+        new FirefoxDriver(By.linkText("Street bundy"), By.id("Street bundy")).hashCode();
         driver.get(new FirefoxDriver(baseUrl.toLowerCase())).click();
-        driver.findElement(By.linkText("Street bundy").click()).click();
+        new FirefoxDriver(By.id(By.linkText("Street bundy"))).hashCode();
+        a.byteValue();
+        driver.get(baseUrl, "sdfs", 's', 2.0, 123, this.baseUrl);
+        driver.findElement(By.linkText("Street bundy")).click();
         driver.findElement(By.id(By.linkText("Street bundy"))).click().click();
         driver.findElement(By.id(baseUrl)).click();
     }

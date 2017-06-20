@@ -1,9 +1,13 @@
-package cz.osu.core;
+package cz.osu.core.resolver;
 
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -14,11 +18,14 @@ import com.github.javaparser.ast.expr.AssignExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.NameExpr;
+import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
+import com.github.javaparser.ast.nodeTypes.NodeWithName;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.nodeTypes.NodeWithVariables;
 import com.github.javaparser.ast.stmt.BlockStmt;
 
+import cz.osu.core.enums.WebDriverType;
 import cz.osu.core.util.ExpressionComparator;
 
 /**
@@ -37,6 +44,8 @@ public class BindingResolver {
 
     private List<FieldDeclaration> fields;
 
+    private Map<String, ObjectCreationExpr> cache = new HashMap<>();
+
     public void setTestCase(BlockStmt testCase) {
         this.testCase = testCase;
     }
@@ -51,6 +60,10 @@ public class BindingResolver {
 
     public void setFields(List<FieldDeclaration> fields) {
         this.fields = fields;
+    }
+
+    public void clearCache() {
+        cache = new HashMap<>();
     }
 
     private <T extends Node> Expression getArgumentValue(NodeWithVariables<T> nodeWithVariables) {
@@ -236,16 +249,54 @@ public class BindingResolver {
         return findLastValueBeforeUsage(argumentValues, argument);
     }
 
-    public Expression resolveExpressionBinding(Expression expression) {
-        Expression resolvedScopeExpression = expression;
+    private boolean isDriverType(String typeName) {
+        return Arrays.stream(WebDriverType.values())
+                .anyMatch(driverType -> driverType.equals(typeName));
+    }
 
-        while (isNameOrFieldAccessExpr(resolvedScopeExpression)) {
-            Expression tmpExpr =  resolveBinding(resolvedScopeExpression);
-            if (tmpExpr == null) {
-                return resolvedScopeExpression;
-            }
-            resolvedScopeExpression = tmpExpr;
+    private Expression tryFindDriverInCache(Expression expression) {
+        Expression driver = null;
+        // return driver from cache if cache is not empty
+        if (!cache.isEmpty()) {
+            String name = ((NodeWithSimpleName) expression).getNameAsString();
+            driver = cache.get(name);
         }
-        return resolvedScopeExpression;
+        return driver;
+    }
+
+    private void trySetDriverInCache(Expression expression, Expression resolvedExpression) {
+        String name = ((NodeWithSimpleName) expression).getNameAsString();
+
+        if (cache.isEmpty()) {
+            if (resolvedExpression instanceof ObjectCreationExpr) {
+                String typeName = ((ObjectCreationExpr) resolvedExpression).getType().getNameAsString();
+                if (isDriverType(typeName)) {
+                    cache.put(name, (ObjectCreationExpr)resolvedExpression);
+                }
+            }
+        }
+    }
+
+    public Expression resolveExpressionBinding(Expression expression) {
+        Expression resolvedExpression = expression;
+
+        while (isNameOrFieldAccessExpr(expression) && (resolvedExpression != null)) {
+            if ((resolvedExpression = tryFindDriverInCache(expression)) != null) {
+                expression = resolvedExpression;
+            } else if ((resolvedExpression = resolveBinding(expression)) != null) {
+                trySetDriverInCache(expression, resolvedExpression);
+                expression = resolvedExpression;
+            }
+        }
+        return expression;
+    }
+
+    public String resolveDriverNameBinding() {
+        // each test case has only one instance of driver
+        Optional<String> driverTypeName = cache.values().stream()
+                .map(objectCreationExpr -> objectCreationExpr.getType().getNameAsString())
+                .findFirst();
+
+        return driverTypeName.orElse(null);
     }
 }

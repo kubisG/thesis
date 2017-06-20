@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
  * Class is responsible for creating and providing a file queue.
  */
 @Component
-public final class FileProvider {
+public final class TestSuitsProvider {
 
     @Inject
     private FileExceptionUtil exceptionUtil;

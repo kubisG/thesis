@@ -1,14 +1,18 @@
-package cz.osu.core;
+package cz.osu.core.parser;
 
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
 
+import java.util.Arrays;
+import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.stream.Collectors;
 
 import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.LiteralExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
@@ -16,13 +20,18 @@ import com.github.javaparser.ast.nodeTypes.NodeWithArguments;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 
+import cz.osu.core.enums.Action;
 import cz.osu.core.enums.ExpressionType;
 import cz.osu.core.enums.ScopeType;
+import cz.osu.core.enums.WebDriverType;
 import cz.osu.core.model.Method;
+import cz.osu.core.model.Parameter;
 import cz.osu.core.model.Scope;
 import cz.osu.core.model.Statement;
 import cz.osu.core.model.TestCase;
 import cz.osu.core.model.Variable;
+import cz.osu.core.resolver.BindingResolver;
+import cz.osu.core.resolver.ClassResolver;
 
 /**
  * Project: thesis
@@ -52,10 +61,27 @@ public class TestCaseParser {
                 .collect(Collectors.toList());
     }
 
+    private boolean isTypeOfDriver(String scopeTypeName) {
+        return Arrays.stream(WebDriverType.values())
+                .anyMatch(driverType -> driverType.equals(scopeTypeName));
+    }
+
+    // TODO: 20. 6. 2017 replace hardcoded List with actions
+    private boolean hasAction(Deque<Method> methods) {
+        String methodName = methods.getLast().getName();
+
+        return Arrays.stream(Action.values())
+                .anyMatch(action -> action.equals(methodName));
+    }
+
+    private String getName(MethodCallExpr methodCallExpr) {
+        return methodCallExpr.getNameAsString();
+    }
+
     private Scope parseScope(String scopeExprName, ScopeType scopeType) {
         Scope scope = new Scope(scopeType);
 
-        Class<?> scopeClass = classResolver.resolveScopeClass(scopeExprName);
+        Class<?> scopeClass = classResolver.resolveExpressionClass(scopeExprName);
         scope.setScopeClass(scopeClass);
 
         return scope;
@@ -68,7 +94,16 @@ public class TestCaseParser {
 
     private Scope parseObjectCreationExprScope(ObjectCreationExpr scopeExpr) {
         String scopeExprName = scopeExpr.getType().getNameAsString();
+
+        if (isTypeOfDriver(scopeExprName)) {
+            return parseScope(scopeExprName, ScopeType.DRIVER_INSTANCE);
+        }
         return parseScope(scopeExprName, ScopeType.NEW_CLASS_INSTANCE);
+    }
+
+    private Scope parseLiteralExprScope(LiteralExpr scopeExpr) {
+        Variable scopeVar = variableParser.parse(scopeExpr);
+        return new Scope(ScopeType.NEW_CLASS_INSTANCE, scopeVar.getValue(), scopeVar.getType());
     }
 
     private Expression tryGetScopeExpr(MethodCallExpr methodCallExpr) {
@@ -79,7 +114,7 @@ public class TestCaseParser {
     }
 
     private Scope getScope(MethodCallExpr singleMethodCallExpr) {
-        Scope scope = null;
+        Scope scope;
         Expression scopeExpr = tryGetScopeExpr(singleMethodCallExpr);
         String scopeClassName = scopeExpr.getClass().getSimpleName();
 
@@ -91,8 +126,10 @@ public class TestCaseParser {
                 scope = parseNameExprScope((NameExpr) scopeExpr);
                 break;
             case "ObjectCreationExpr":
-                scope = parseObjectCreationExprScope((ObjectCreationExpr) scopeExpr);
+                scope = new Scope(ScopeType.CLASS_INSTANCE);
                 break;
+            default:
+                scope = parseLiteralExprScope((LiteralExpr) scopeExpr);
         }
         return scope;
     }
@@ -108,13 +145,6 @@ public class TestCaseParser {
         } else {
             singleMethodCallExpr.setScope(scopeExpr);
         }
-    }
-
-    private Scope parseScope(MethodCallExpr singleMethodCallExpr) {
-        // resolve method scope expression binding
-        resolveScopeForMethodCallExpr(singleMethodCallExpr);
-        // parse and get method scope expression
-        return getScope(singleMethodCallExpr);
     }
 
     private void addLiteralParameter(Method method, Expression argument) {
@@ -133,8 +163,8 @@ public class TestCaseParser {
                 method.addParameter(statement);
                 break;
             case "ObjectCreationExpr":
-                statement = parseObjectCreationExpr((ObjectCreationExpr) argument);
-                method.addParameter(statement);
+                Method param = parseNodeWithArguments((ObjectCreationExpr) argument);
+                method.addParameter(new Statement(param));
                 break;
             default:
                 addLiteralParameter(method, argument);
@@ -146,66 +176,65 @@ public class TestCaseParser {
         arguments.forEach(argument -> addMethodParameter(method, argument));
     }
 
-    private List<MethodCallExpr> breakDownToSingleMethodCalls(MethodCallExpr methodCallExpr) {
-        List<MethodCallExpr> singleMethodCallExprs = new LinkedList<>();
+    private List<NodeWithArguments> breakDownToSingleMethodCalls(MethodCallExpr methodCallExpr) {
+        List<NodeWithArguments> singleMethodCallExprs = new LinkedList<>();
         Expression expression = methodCallExpr;
 
         while (expression instanceof MethodCallExpr) {
             MethodCallExpr tmpMethodCallExpr = (MethodCallExpr) expression;
             singleMethodCallExprs.add(tmpMethodCallExpr);
-            expression = (tmpMethodCallExpr).getScope().orElse(null);
+            expression = tmpMethodCallExpr.getScope().orElse(null);
+        }
+        // if the returned expression is instance of ObjectCreationExpr than add it too
+        if (expression instanceof ObjectCreationExpr) {
+            singleMethodCallExprs.add((ObjectCreationExpr)expression);
         }
         return singleMethodCallExprs;
     }
 
-    private Statement parseObjectCreationExpr(ObjectCreationExpr objectCreationExpr) {
-        Statement statement = new Statement();
+    private Method parseNodeWithArguments(NodeWithArguments nodeWithArguments) {
         Method method = new Method();
 
-        // set object creation method
-        method.setScope(parseObjectCreationExprScope(objectCreationExpr));
-        addMethodParameters(method, objectCreationExpr);
-        // set statement
-        statement.add(method);
+        if (nodeWithArguments instanceof ObjectCreationExpr) {
+            method.setScope(parseObjectCreationExprScope((ObjectCreationExpr) nodeWithArguments));
+        }
+        else if (nodeWithArguments instanceof MethodCallExpr){
+            method.setName(getName((MethodCallExpr) nodeWithArguments));
+            method.setScope(getScope((MethodCallExpr) nodeWithArguments));
+        } else
+            throw new UnsupportedOperationException("Unable to parse node with arguments");
 
-        return statement;
-    }
-
-    private Method parseSingleMethodCallExpr(MethodCallExpr singleMethodCall) {
-        Method method = new Method();
-
-        method.setName(singleMethodCall.getNameAsString());
-        method.setScope(parseScope(singleMethodCall));
-        addMethodParameters(method, singleMethodCall);
-
+        addMethodParameters(method, nodeWithArguments);
         return method;
     }
 
-    Statement parseMethodCallExpr(MethodCallExpr methodCallExpr) {
-        Statement statement = new Statement();
+    private Statement parseMethodCallExpr(MethodCallExpr methodCallExpr) {
         // resolve method call scope
         resolveScopeForMethodCallExpr(methodCallExpr);
         // break down whole method call to single ones
-        List<MethodCallExpr> singleMethodCallExprs = breakDownToSingleMethodCalls(methodCallExpr);
+        List<NodeWithArguments> singleMethodCallExprs = breakDownToSingleMethodCalls(methodCallExpr);
         // parse each single method to Method and collect them into Statement class
-        singleMethodCallExprs.stream()
-                .map(singleMethodCallExpr -> parseSingleMethodCallExpr(singleMethodCallExpr))
-                .forEach(statement::add);
+        Deque<Method> methods = singleMethodCallExprs.stream()
+                .map(singleMethodCallExpr -> parseNodeWithArguments(singleMethodCallExpr))
+                .collect(LinkedList::new, LinkedList::addFirst, LinkedList::addAll);
 
-        return statement;
+        Boolean applyActionFlag = hasAction(methods);
+
+        return new Statement(methods, applyActionFlag);
     }
 
     public TestCase parse(BlockStmt testBody) {
-        TestCase testCase = new TestCase();
         // get only expression statements
-        List<ExpressionStmt> statements = testBody.getChildNodesByType(ExpressionStmt.class);
+        List<ExpressionStmt> statementExprs = testBody.getChildNodesByType(ExpressionStmt.class);
         // get only method call expressions
-        List<MethodCallExpr> methodCallExprs = getExpressionsByType(statements, MethodCallExpr.class);
+        List<MethodCallExpr> methodCallExprs = getExpressionsByType(statementExprs, MethodCallExpr.class);
         // parse method call expressions to statement and collect them into TestCase class
-        methodCallExprs.stream()
+        Queue<Statement> statements = methodCallExprs.stream()
                 .map(methodCallExpr -> parseMethodCallExpr(methodCallExpr))
-                .forEach(testCase::add);
+                .collect(LinkedList::new, LinkedList::add, LinkedList::addAll);
+        // get class of WebDriver instance
+        String driverName = bindingResolver.resolveDriverNameBinding();
 
-        return testCase;
+        return new TestCase(driverName, statements);
     }
 }

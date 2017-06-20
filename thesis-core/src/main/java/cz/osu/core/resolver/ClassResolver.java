@@ -1,10 +1,20 @@
-package cz.osu.core;
+package cz.osu.core.resolver;
 
+import org.reflections.Reflections;
+import org.reflections.scanners.ResourcesScanner;
+import org.reflections.scanners.SubTypesScanner;
+import org.reflections.scanners.TypeAnnotationsScanner;
+import org.reflections.util.ClasspathHelper;
+import org.reflections.util.ConfigurationBuilder;
+import org.reflections.util.FilterBuilder;
 import org.springframework.stereotype.Component;
 
+import java.sql.Ref;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -49,7 +59,22 @@ public class ClassResolver {
                 .findFirst();
     }
 
-    public Class<?> resolveScopeClass(String scopeExprName) {
+    /*private Set<Class<?>> setUp(){
+        List<ClassLoader> classLoadersList = new LinkedList<ClassLoader>();
+        classLoadersList.add(ClasspathHelper.contextClassLoader());
+        classLoadersList.add(ClasspathHelper.staticClassLoader());
+
+        Reflections reflections = new Reflections(new ConfigurationBuilder()
+                .setScanners(new SubTypesScanner(false *//* don't exclude Object.class *//*), new ResourcesScanner())
+                .setUrls(ClasspathHelper.forClassLoader(classLoadersList.toArray(new ClassLoader[0])))
+                .filterInputsBy(new FilterBuilder().include(FilterBuilder.prefix("org.openqa.selenium"))));
+
+        Set<Class<?>> classes = reflections.getSubTypesOf(Object.class);
+
+        return classes;
+    }*/
+
+    public Class<?> resolveExpressionClass(String scopeExprName) {
         Optional<String> tmpScopeClassName;
         String scopeClassName;
 

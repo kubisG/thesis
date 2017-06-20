@@ -4,6 +4,9 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import cz.osu.core.enums.ScopeType;
 
 /**
@@ -13,10 +16,18 @@ import cz.osu.core.enums.ScopeType;
 public class Scope {
 
     private ScopeType scopeType;
+
     private Object scopeValue;
-    private Class scopeClass;
+
+    private Class<?> scopeClass;
 
     public Scope() {
+    }
+
+    public Scope(ScopeType scopeType, Object scopeValue, Class<?> scopeClass) {
+        this.scopeType = scopeType;
+        this.scopeValue = scopeValue;
+        this.scopeClass = scopeClass;
     }
 
     public Scope(ScopeType scopeType) {
@@ -39,44 +50,12 @@ public class Scope {
         this.scopeValue = scopeValue;
     }
 
-    public Class getScopeClass() {
+    public Class<?> getScopeClass() {
         return scopeClass;
     }
 
-    public void setScopeClass(Class scopeClass) {
+    public void setScopeClass(Class<?> scopeClass) {
         this.scopeClass = scopeClass;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-
-        if (!(o instanceof Scope)) return false;
-
-        Scope scope = (Scope) o;
-
-        return new EqualsBuilder()
-                .append(scopeType, scope.scopeType)
-                .append(scopeValue, scope.scopeValue)
-                .append(scopeClass, scope.scopeClass)
-                .isEquals();
-    }
-
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder(17, 37)
-                .append(scopeType)
-                .append(scopeValue)
-                .append(scopeClass)
-                .toHashCode();
-    }
-
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this)
-                .append("scopeType", scopeType)
-                .append("scopeValue", scopeValue)
-                .append("scopeClass", scopeClass)
-                .toString();
-    }
 }

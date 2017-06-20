@@ -1,4 +1,4 @@
-package cz.osu.core;
+package cz.osu.core.parser;
 
 import cz.osu.test.BeforeMethod;
 import cz.osu.test.Fields;
@@ -18,6 +18,8 @@ import java.util.List;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 
 import cz.osu.core.model.TestCase;
+import cz.osu.core.parser.TestCaseParser;
+import cz.osu.core.resolver.BindingResolver;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

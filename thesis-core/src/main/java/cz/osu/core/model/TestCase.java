@@ -1,5 +1,7 @@
 package cz.osu.core.model;
 
+import org.openqa.selenium.WebDriver;
+
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -11,19 +13,32 @@ import java.util.Queue;
  */
 public class TestCase {
 
-    private Queue<Statement> statements = new LinkedList<>();
+    private final String driverName;
 
-    public TestCase() {}
+    private final Queue<Statement> statements;
 
-    public TestCase(Queue statements) {
+    public TestCase(String driverName, Queue<Statement> statements) {
+        this.driverName = driverName;
         this.statements = statements;
     }
 
-    public Queue getMethods() {
+    public String getDriverName() {
+        return driverName;
+    }
+
+    public Queue<Statement> getStatements() {
         return statements;
     }
 
-    public void add(Statement statement) {
-        statements.add(statement);
+    public boolean hasNextStatement() {
+        return !statements.isEmpty();
+    }
+
+    public Statement getNextStatement() {
+        return statements.peek();
+    }
+
+    public Statement removeNextStatement() {
+        return statements.poll();
     }
 }

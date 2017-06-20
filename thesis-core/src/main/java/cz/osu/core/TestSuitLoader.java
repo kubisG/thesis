@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component;
  * Class which load and parse input selenium test file/s.
  */
 @Component
-public final class FileLoader {
+public final class TestSuitLoader {
 
     @Inject
     private FileExceptionUtil exceptionUtil;

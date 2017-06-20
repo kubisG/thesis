@@ -1,4 +1,4 @@
-package cz.osu.core;
+package cz.osu.core.parser;
 
 import org.springframework.stereotype.Component;
 

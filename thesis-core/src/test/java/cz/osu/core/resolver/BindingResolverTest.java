@@ -1,4 +1,4 @@
-package cz.osu.core;
+package cz.osu.core.resolver;
 
 import cz.osu.test.BeforeMethod;
 import cz.osu.test.Fields;
@@ -27,6 +27,8 @@ import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.expr.ThisExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.Statement;
+
+import cz.osu.core.resolver.BindingResolver;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

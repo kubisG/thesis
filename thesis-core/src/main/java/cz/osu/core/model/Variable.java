@@ -1,8 +1,5 @@
 package cz.osu.core.model;
 
-import java.util.LinkedList;
-import java.util.Queue;
-
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -13,26 +10,14 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  *
  * Generic model class which represents field or variable.
  */
-public class Variable extends Parameter{
+public class Variable {
 
-    private final String name;
     private final Object value;
     private final Class<?> type;
         
     public Variable(Object value, Class type) {
-        this.name = null;
         this.value = value;
         this.type = type;
-    }
-
-    public Variable(String name, Object value, Class type) {
-        this.name = name;
-        this.value = value;
-        this.type = type;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public Object getValue() {
@@ -52,7 +37,6 @@ public class Variable extends Parameter{
         Variable variable = (Variable) o;
 
         return new EqualsBuilder()
-                .append(name, variable.name)
                 .append(value, variable.value)
                 .append(type, variable.type)
                 .isEquals();
@@ -61,7 +45,6 @@ public class Variable extends Parameter{
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
-                .append(name)
                 .append(value)
                 .append(type)
                 .toHashCode();
@@ -70,7 +53,6 @@ public class Variable extends Parameter{
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-                .append("name", name)
                 .append("value", value)
                 .append("type", type)
                 .toString();

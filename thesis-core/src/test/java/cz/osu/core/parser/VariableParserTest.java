@@ -1,29 +1,23 @@
-package cz.osu.core;
+package cz.osu.core.parser;
 
-import cz.osu.test.BeforeMethod;
-import cz.osu.test.Fields;
-import cz.osu.test.TestMethod;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.expression.spel.ast.BooleanLiteral;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import javax.inject.Inject;
 
-import java.util.List;
-
 import com.github.javaparser.ast.expr.BooleanLiteralExpr;
 import com.github.javaparser.ast.expr.CharLiteralExpr;
 import com.github.javaparser.ast.expr.DoubleLiteralExpr;
-import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.IntegerLiteralExpr;
 import com.github.javaparser.ast.expr.LongLiteralExpr;
 import com.github.javaparser.ast.expr.NullLiteralExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 
 import cz.osu.core.model.Variable;
+import cz.osu.core.parser.VariableParser;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

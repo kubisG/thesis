@@ -23,7 +23,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
@@ -34,7 +33,7 @@ import static org.junit.Assert.assertThat;
  */
 @ContextConfiguration(locations = {"/application-context-test.xml"})
 @RunWith(SpringJUnit4ClassRunner.class)
-public class FileLoaderTest {
+public class TestSuitLoaderTest {
 
     private static final String VALID_SELENIUM_TEST_DIR_PATH = "/valid_tests";
     private static final String INVALID_SELENIUM_TEST_DIR_PATH  = "/invalid_tests";
@@ -42,10 +41,10 @@ public class FileLoaderTest {
     private static final String CURRENT_LOCALE = Locale.getDefault().toString();
 
     @Inject
-    private FileLoader fileLoader;
+    private TestSuitLoader testSuitLoader;
 
     @Inject
-    private FileProvider fileProvider;
+    private TestSuitsProvider testSuitsProvider;
 
     @Resource
     private Properties messageProperties;
@@ -54,13 +53,13 @@ public class FileLoaderTest {
     public void testLoaderShouldLoadNextTestFileAndDecrementFileCount() throws Exception {
         // prepare
         // TODO: 13. 4. 2017 replace fileProvider by mocked queue
-        final Queue<File> seleniumTestFiles = fileProvider.getFilesFromDirectory(BASE_DIR_PATH + VALID_SELENIUM_TEST_DIR_PATH);
-        fileLoader.setFiles(seleniumTestFiles);
-        final Integer expectedCount = fileLoader.getFilesCount() - 1;
+        final Queue<File> seleniumTestFiles = testSuitsProvider.getFilesFromDirectory(BASE_DIR_PATH + VALID_SELENIUM_TEST_DIR_PATH);
+        testSuitLoader.setFiles(seleniumTestFiles);
+        final Integer expectedCount = testSuitLoader.getFilesCount() - 1;
 
         // execute
-        final CompilationUnit actualResult = fileLoader.loadNextTest();
-        final Integer actualCount = fileLoader.getFilesCount();
+        final CompilationUnit actualResult = testSuitLoader.loadNextTest();
+        final Integer actualCount = testSuitLoader.getFilesCount();
 
         // verify
         assertThat(actualCount, is(expectedCount));
@@ -78,7 +77,7 @@ public class FileLoaderTest {
 
         // execute
         try {
-            fileLoader.loadTest(file);
+            testSuitLoader.loadTest(file);
         } catch (FileLoaderException actualException) {
             // verify
             assertThat(actualException).isInstanceOf(FileLoaderException.class)
@@ -96,7 +95,7 @@ public class FileLoaderTest {
 
         // execute
         try {
-            fileLoader.loadTest(file);
+            testSuitLoader.loadTest(file);
         } catch (FileLoaderException actualException) {
             // verify
             assertThat(actualException).isInstanceOf(FileLoaderException.class)
@@ -111,10 +110,10 @@ public class FileLoaderTest {
             add(new File("mockedFile1"));
             add(new File("mockedFile2"));
         }};
-        fileLoader.setFiles(seleniumTestFiles);
+        testSuitLoader.setFiles(seleniumTestFiles);
 
         // execute
-        boolean actualResult = fileLoader.hasNextTest();
+        boolean actualResult = testSuitLoader.hasNextTest();
 
         // verify
         assertThat(actualResult, is(true));
@@ -123,10 +122,10 @@ public class FileLoaderTest {
     @Test
     public void testLoaderShouldReturnFalseIfThereIsNoFileToLoad() throws Exception {
         // prepare
-        fileLoader.setFiles(new LinkedList<>());
+        testSuitLoader.setFiles(new LinkedList<>());
 
         // execute
-        boolean actualResult = fileLoader.hasNextTest();
+        boolean actualResult = testSuitLoader.hasNextTest();
 
         // verify
         assertThat(actualResult, is(false));
@@ -139,10 +138,10 @@ public class FileLoaderTest {
             add(new File("mockedFile1"));
             add(new File("mockedFile2"));
         }};
-        fileLoader.setFiles(seleniumTestFiles);
+        testSuitLoader.setFiles(seleniumTestFiles);
 
         // execute
-        Integer actualCount = fileLoader.getFilesCount();
+        Integer actualCount = testSuitLoader.getFilesCount();
 
         // verify
         assertThat(actualCount, is(equalTo(2)));

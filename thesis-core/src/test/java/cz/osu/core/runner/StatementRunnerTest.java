@@ -1,5 +1,4 @@
-package cz.osu.core;
-
+package cz.osu.core.runner;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -15,21 +14,26 @@ import java.io.FileNotFoundException;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 
+import cz.osu.core.model.Statement;
+import cz.osu.core.model.TestCase;
 import cz.osu.core.model.TestSuit;
+import cz.osu.core.parser.TestSuitParser;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.*;
 
 /**
  * Project: thesis
- * Created by Jakub on 12. 4. 2017.
+ * Created by Jakub on 19. 6. 2017.
  */
-
 @ContextConfiguration(locations = {"/application-context-test.xml"})
 @RunWith(SpringJUnit4ClassRunner.class)
-public class TestSuitParserTest {
+public class StatementRunnerTest {
 
     @Inject
     private TestSuitParser testSuitParser;
+
+    @Inject
+    private StatementRunner statementRunner;
 
     private static CompilationUnit COMPILATION_UNIT;
 
@@ -46,11 +50,12 @@ public class TestSuitParserTest {
     }
 
     @Test
-    public void testTestSuitParserShouldReturnFields() throws Exception {
-        final File jarFile = new File(getClass().getProtectionDomain().getCodeSource().getLocation().getPath());
-        // execute
+    public void run() throws Exception {
         final TestSuit testSuit = testSuitParser.parse(COMPILATION_UNIT);
+        final TestCase testCase = testSuit.getNextTestCase();
+        final Statement statement = testCase.getNextStatement();
 
-        assertThat(testSuit).isNull();
+        statementRunner.run(statement);
     }
+
 }
