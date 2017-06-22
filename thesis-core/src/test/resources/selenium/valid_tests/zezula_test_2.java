@@ -25,6 +25,7 @@ public class ZezulaTest2 {
   @Test
   public void testZezulaTest2() throws Exception {
     driver.get("https://www.snowboard-zezula.cz");
+    driver.findElement(By.xpath("//div/ul/li[2]/a/span")).click();
     driver.findElement(By.linkText("Street bundy")).click();
     driver.findElement(By.id("frm-filterForm-filters-type-formControl-3")).click();
     driver.findElement(By.id("frm-filterForm-applyFilters")).click();

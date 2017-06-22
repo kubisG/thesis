@@ -1,5 +1,7 @@
 package cz.osu.core.strategy.evaluation;
 
+import org.springframework.stereotype.Component;
+
 import java.lang.management.OperatingSystemMXBean;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
@@ -16,6 +18,7 @@ import cz.osu.core.strategy.evaluation.EvaluationStrategy;
  * Project: thesis
  * Created by Jakub on 15. 6. 2017.
  */
+@Component
 public class InstanceLevelEvaluation implements EvaluationStrategy {
 
     @Override

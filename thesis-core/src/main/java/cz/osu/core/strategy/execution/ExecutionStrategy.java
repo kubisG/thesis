@@ -1,5 +1,6 @@
 package cz.osu.core.strategy.execution;
 
+import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
 
 import cz.osu.core.model.Statement;
@@ -10,5 +11,5 @@ import cz.osu.core.model.Statement;
  */
 public interface ExecutionStrategy {
 
-    void execute(Statement statement) throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException;
+    void execute(Statement statement) throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException, AWTException, InterruptedException;
 }

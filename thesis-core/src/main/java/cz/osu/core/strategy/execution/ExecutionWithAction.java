@@ -1,12 +1,16 @@
 package cz.osu.core.strategy.execution;
 
+import org.openqa.selenium.WebElement;
+import org.springframework.stereotype.Component;
+
 import javax.inject.Inject;
 
+import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
 
 import cz.osu.core.action.ActionFacade;
 import cz.osu.core.enums.ScopeType;
-import cz.osu.core.factory.EvaluationStrategyFactory;
+import cz.osu.core.facade.EvaluationFacade;
 import cz.osu.core.model.Method;
 import cz.osu.core.model.Statement;
 import cz.osu.core.strategy.evaluation.EvaluationStrategy;
@@ -15,14 +19,17 @@ import cz.osu.core.strategy.evaluation.EvaluationStrategy;
  * Project: thesis
  * Created by Jakub on 20. 6. 2017.
  */
+@Component
 public class ExecutionWithAction implements ExecutionStrategy {
 
-    private ActionFacade actionFacade = new ActionFacade();
+    private final EvaluationFacade evaluationFacade;
 
-    private EvaluationStrategy evaluationStrategy;
+    private final ActionFacade actionFacade;
 
-    private void setEvaluationStrategy(ScopeType scopeType) {
-        this.evaluationStrategy = EvaluationStrategyFactory.getEvaluationStrategy(scopeType);
+    @Inject
+    public ExecutionWithAction(EvaluationFacade evaluationFacade, ActionFacade actionFacade) {
+        this.evaluationFacade = evaluationFacade;
+        this.actionFacade = actionFacade;
     }
 
     private Method evaluate(Statement statement) throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
@@ -30,19 +37,21 @@ public class ExecutionWithAction implements ExecutionStrategy {
 
         while(statement.hasAtLeastTwoMethods()) {
             currentMethod = statement.removeMethod();
-            setEvaluationStrategy(currentMethod.getScope().getScopeType());
-            Object value = evaluationStrategy.evaluate(currentMethod);
+            Object value = evaluationFacade.evaluate(currentMethod);
             statement.getMethod().getScope().setScopeValue(value);
         }
         return statement.getMethod();
     }
 
     @Override
-    public void execute(Statement statement) throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
-        // evaluate statement to be able to set action method scope
+    public void execute(Statement statement) throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException, AWTException, InterruptedException {
+        // evaluate part of statement to set action method scope
         Method actionMethod = evaluate(statement);
-        // apply action facade
-        actionFacade.apply(actionMethod);
+        // apply move and highlight action on webElement (scopeValue equals webElement)
+        Object webElement = actionMethod.getScope().getScopeValue();
+        actionFacade.apply((WebElement) webElement);
+        // evaluate the rest part of statement (finish action)
+        evaluationFacade.evaluate(actionMethod);
     }
 }
 

@@ -2,12 +2,15 @@ package cz.osu.core.runner;
 
 import org.springframework.stereotype.Component;
 
+import javax.inject.Inject;
+
+import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import cz.osu.core.enums.ScopeType;
-import cz.osu.core.factory.EvaluationStrategyFactory;
-import cz.osu.core.factory.ExecutionStrategyFactory;
+import cz.osu.core.facade.EvaluationFacade;
+import cz.osu.core.facade.ExecutionFacade;
 import cz.osu.core.model.Method;
 import cz.osu.core.model.Statement;
 import cz.osu.core.model.Variable;
@@ -21,33 +24,28 @@ import cz.osu.core.strategy.execution.ExecutionStrategy;
 @Component
 public class StatementRunner {
 
-    private EvaluationStrategy evaluationStrategy;
+    private final EvaluationFacade evaluationFacade;
 
-    private ExecutionStrategy executionStrategy;
+    private final ExecutionFacade executionFacade;
 
-    private void setEvaluationStrategy(ScopeType scopeType) {
-        evaluationStrategy = EvaluationStrategyFactory.getEvaluationStrategy(scopeType);
+    @Inject
+    public StatementRunner(EvaluationFacade evaluationFacade, ExecutionFacade executionFacade) {
+        this.evaluationFacade = evaluationFacade;
+        this.executionFacade = executionFacade;
     }
 
-    private void setExecutionStrategy(Boolean actionFlag) {
-        executionStrategy = ExecutionStrategyFactory.getExecutionStrategy(actionFlag);
-    }
-
-    // TODO: 20. 6. 2017 ucesat implementaci s novyma metodama pro statement
-    private Object evaluateStatementParameter(Statement statement) throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
-        Method currentMethod = statement.removeMethod();
+    private Object evaluateParameter(Statement statement) throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+        Method currentMethod;
         Method nextMethod;
         Object value = null;
 
-        while (currentMethod != null) {
-            evaluateMethodParameters(currentMethod);
-            setEvaluationStrategy(currentMethod.getScope().getScopeType());
-            value = evaluationStrategy.evaluate(currentMethod);
-            if ((nextMethod = statement.removeMethod()) != null) {
+        while(statement.hasMethod()) {
+            currentMethod = statement.removeMethod();
+            evaluateMethodParameters(currentMethod); // indirect recursion
+            value = evaluationFacade.evaluate(currentMethod);
+            if ((nextMethod = statement.getMethod()) != null) {
                 nextMethod.getScope().setScopeValue(value);
-                currentMethod = nextMethod;
-            } else
-                currentMethod = null;
+            }
         }
         return value;
     }
@@ -59,7 +57,7 @@ public class StatementRunner {
             Object parameter = parameters.get(i);
             if (parameter instanceof Statement) {
                 Statement statement = (Statement) parameter;
-                Object value = evaluateStatementParameter(statement);
+                Object value = evaluateParameter(statement); // indirect recursion
                 parameters.set(i, new Variable(value, value.getClass()));
             }
         }
@@ -71,12 +69,11 @@ public class StatementRunner {
         }
     }
 
-    private void execute(Statement statement) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        setExecutionStrategy(statement.getApplyActionFlag());
-        executionStrategy.execute(statement);
+    private void execute(Statement statement) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, AWTException, InterruptedException {
+        executionFacade.execute(statement);
     }
 
-    public void run(Statement statement) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public void run(Statement statement) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, InterruptedException, AWTException {
         // evaluate parameters for all methods in statement
         prepare(statement);
         // perform action

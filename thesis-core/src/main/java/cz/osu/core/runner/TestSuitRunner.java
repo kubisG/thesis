@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
 
+import java.awt.*;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
@@ -23,7 +24,7 @@ public class TestSuitRunner {
         this.testCaseRunner = testCaseRunner;
     }
 
-    public void run(TestSuit testSuit) throws IOException, InterruptedException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+    public void run(TestSuit testSuit) throws IOException, InterruptedException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException, AWTException {
         // run all test cases
         while (testSuit.hasNextTestCase()) {
             testCaseRunner.run(testSuit.getNextTestCase());

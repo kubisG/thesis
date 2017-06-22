@@ -42,7 +42,7 @@ public class TestSuitRunnerTest {
         String baseDirPath = ClassLoader.getSystemResource("selenium").getPath();
 
         String validSeleniumTests = "/valid_tests/";
-        String validSeleniumTest = "zezula_test_3.java";
+        String validSeleniumTest = "zezula_test_2.java";
 
         File file = new File(baseDirPath + validSeleniumTests + validSeleniumTest);
 

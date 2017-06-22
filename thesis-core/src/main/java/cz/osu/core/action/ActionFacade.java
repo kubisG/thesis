@@ -1,13 +1,14 @@
 package cz.osu.core.action;
 
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.InvocationTargetException;
+import javax.inject.Inject;
 
-import cz.osu.core.enums.ScopeType;
-import cz.osu.core.factory.EvaluationStrategyFactory;
-import cz.osu.core.model.Method;
-import cz.osu.core.strategy.evaluation.EvaluationStrategy;
+import java.awt.*;
 
 /**
  * Project: thesis
@@ -16,17 +17,36 @@ import cz.osu.core.strategy.evaluation.EvaluationStrategy;
 @Component
 public class ActionFacade {
 
-    /*private MoveAction moveAction;
+    private MoveAction moveAction;
 
-    private HighlighAction highlighAction;*/
+    private HighlightAction highlightAction;
 
-    private EvaluationStrategy evaluationStrategy;
+    private WebDriver driver;
 
-    public ActionFacade() {
-        this.evaluationStrategy = EvaluationStrategyFactory.getEvaluationStrategy(ScopeType.CLASS_INSTANCE);
+    @Inject
+    public ActionFacade(MoveAction moveAction, HighlightAction highlightAction) {
+        this.moveAction = moveAction;
+        this.highlightAction = highlightAction;
     }
 
-    public void apply(Method method) throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
-        evaluationStrategy.evaluate(method);
+    public void setDriver(WebDriver driver) {
+        this.driver = driver;
     }
+
+    private void setUpActionFacadeComponents() {
+        moveAction.setDriver(driver);
+        highlightAction.setDriver(driver);
+    }
+
+    public void apply(WebElement webElement) throws InterruptedException, AWTException {
+        // set up Actions facade
+        setUpActionFacadeComponents();
+        // highlight action
+        highlightAction.highLight(webElement);
+        // move action
+        moveAction.move(webElement);
+        /*Actions actions = new Actions(driver);
+        actions.moveToElement(webElement).perform();*/
+    }
+
 }

@@ -1,15 +1,16 @@
 package cz.osu.core.runner;
 
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
 
+import java.awt.*;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
 import cz.osu.core.Recorder;
+import cz.osu.core.action.ActionFacade;
 import cz.osu.core.enums.ScopeType;
 import cz.osu.core.factory.WebDriverFactory;
 import cz.osu.core.model.Scope;
@@ -27,22 +28,25 @@ public class TestCaseRunner {
 
     private final Recorder recorder;
 
+    private final ActionFacade actionFacade;
+
     private WebDriver driver;
 
     @Inject
-    public TestCaseRunner(StatementRunner statementRunner, Recorder recorder) {
+    public TestCaseRunner(StatementRunner statementRunner, Recorder recorder, ActionFacade actionFacade) {
         this.statementRunner = statementRunner;
         this.recorder = recorder;
+        this.actionFacade = actionFacade;
     }
 
     private void startDriver(String driverName) throws IOException {
         driver = WebDriverFactory.getWebDriver(driverName);
+        actionFacade.setDriver(driver);
     }
 
     private void stopDriver() {
         driver.quit();
     }
-
 
     private void setDriverAsScope(Statement statement) {
         statement.removeMethod();
@@ -69,13 +73,13 @@ public class TestCaseRunner {
                 .forEach(this::setStatementScope);
     }
 
-    private void execute(TestCase testCase) throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+    private void execute(TestCase testCase) throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException, AWTException, InterruptedException {
         while (testCase.hasNextStatement()) {
             statementRunner.run(testCase.removeNextStatement());
         }
     }
 
-    public void run(TestCase testCase) throws IOException, InterruptedException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public void run(TestCase testCase) throws IOException, InterruptedException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, AWTException {
         // start and set up driver
         startDriver(testCase.getDriverName());
         // prepare test case for running
