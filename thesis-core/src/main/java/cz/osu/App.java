@@ -1,19 +1,17 @@
 package cz.osu;
 
 import cz.osu.core.Composer;
+import cz.osu.core.exception.FileLoaderException;
 import cz.osu.core.exception.FileProviderException;
-import cz.osu.core.model.Variable;
+import cz.osu.core.recorder.Recorder;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import java.io.File;
+import java.awt.*;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.security.CodeSource;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Hello world!
@@ -21,30 +19,25 @@ import java.util.List;
  */
 public class App {
 
-    public static void main( String[] args ) throws FileProviderException, IOException, URISyntaxException {
-        System.err.println("start");
-        ApplicationContext context =
-                new ClassPathXmlApplicationContext(new String[] {"application-context.xml"});
+    // TODO: 27. 6. 2017 will be removed
+    public static final String MOCKED_INPUT_FILES_DIR = "C:\\Users\\Jakub\\input-files";
 
-        System.out.println("BLAAAAAA: " + App.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+    // TODO: 27. 6. 2017 will be removed
+    public static final String MOCKED_OUTPUT_FILES_DIR = "C:\\Users\\Jakub\\output-files";
 
-
-        URL scannedUrl = ClassLoader.getSystemResource(".");
-        File scannedDir = new File(scannedUrl.getFile());
-        List<Class<?>> classes = new ArrayList<Class<?>>();
-
-
-        classes.stream().forEach(System.out::println);
-
-        System.err.println("1");
-        System.err.println("2: " + scannedUrl.getPath());
-        System.err.println(scannedDir);
-        // System.out.println(jarDir.getAbsolutePath());
-
+    public static void main( String[] args ) throws FileProviderException, IOException,
+                                                    URISyntaxException, NoSuchMethodException,
+                                                    InterruptedException, InstantiationException,
+                                                    AWTException, FileLoaderException,
+                                                    IllegalAccessException, InvocationTargetException {
+        // load application context
+        ApplicationContext context = new ClassPathXmlApplicationContext(new String[] {"application-context.xml"});
+        // get bean main bean
         Composer composer = (Composer) context.getBean("Composer");
-        composer.run();
-
-        System.out.println( "Hello World!" + composer.toString());
+        // start process
+        composer.process(MOCKED_INPUT_FILES_DIR, MOCKED_OUTPUT_FILES_DIR);
+        // JAR address
+        System.out.println("BLAAAAAA: " + App.class.getProtectionDomain().getCodeSource().getLocation().getPath());
     }
 
 }

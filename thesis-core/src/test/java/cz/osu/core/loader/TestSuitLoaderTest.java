@@ -1,4 +1,4 @@
-package cz.osu.core;
+package cz.osu.core.loader;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -11,8 +11,10 @@ import javax.inject.Inject;
 
 import com.github.javaparser.ast.CompilationUnit;
 
+import cz.osu.core.TestSuitsProvider;
 import cz.osu.core.exception.FileExceptionParams;
 import cz.osu.core.exception.FileLoaderException;
+import cz.osu.core.loader.TestSuitLoader;
 import cz.osu.core.model.Position;
 
 import org.junit.Ignore;

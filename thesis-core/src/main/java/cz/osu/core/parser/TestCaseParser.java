@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.stream.Collectors;
 
+import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.LiteralExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
@@ -223,9 +224,9 @@ public class TestCaseParser {
         return new Statement(methods, applyActionFlag);
     }
 
-    public TestCase parse(BlockStmt testBody) {
+    public TestCase parse(MethodDeclaration testCase) {
         // get only expression statements
-        List<ExpressionStmt> statementExprs = testBody.getChildNodesByType(ExpressionStmt.class);
+        List<ExpressionStmt> statementExprs = testCase.getChildNodesByType(ExpressionStmt.class);
         // get only method call expressions
         List<MethodCallExpr> methodCallExprs = getExpressionsByType(statementExprs, MethodCallExpr.class);
         // parse method call expressions to statement and collect them into TestCase class
@@ -234,7 +235,9 @@ public class TestCaseParser {
                 .collect(LinkedList::new, LinkedList::add, LinkedList::addAll);
         // get class of WebDriver instance
         String driverName = bindingResolver.resolveDriverNameBinding();
+        // get name of test case
+        String testCaseName = testCase.getNameAsString();
 
-        return new TestCase(driverName, statements);
+        return new TestCase(testCaseName, driverName, statements);
     }
 }

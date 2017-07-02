@@ -2,6 +2,7 @@ package cz.osu.core.action;
 
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.SessionNotCreatedException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -26,12 +27,12 @@ public class HighlightAction {
         this.previousWebElement = previousWebElement;
     }
 
-    private boolean isAttachedToDOM(WebElement webElement) {
+    private boolean isAttachedToDOM() {
         boolean displayed;
 
         try {
             displayed = previousWebElement.isDisplayed();
-        } catch (NoSuchElementException | StaleElementReferenceException ex) {
+        } catch (NoSuchElementException | StaleElementReferenceException | SessionNotCreatedException ex) {
             displayed = false;
         }
         return displayed;
@@ -44,7 +45,7 @@ public class HighlightAction {
             setPreviousWebElement(currentWebElement);
             ((JavascriptExecutor)driver).executeScript("arguments[0].style.cssText='border: 3px solid red; border-radius: 10px; padding: 5px'", currentWebElement);
         } else {
-            if (isAttachedToDOM(previousWebElement)) {
+            if (isAttachedToDOM()) {
                 ((JavascriptExecutor)driver).executeScript("arguments[0].style.border=''", previousWebElement);
                 ((JavascriptExecutor)driver).executeScript("arguments[0].style.cssText='border: 3px solid red; border-radius: 10px; padding: 5px'", currentWebElement);
             } else {
@@ -52,5 +53,5 @@ public class HighlightAction {
             }
             previousWebElement = currentWebElement;
         }
-    };
+    }
 }

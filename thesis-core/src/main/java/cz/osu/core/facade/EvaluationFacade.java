@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
 
+import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 

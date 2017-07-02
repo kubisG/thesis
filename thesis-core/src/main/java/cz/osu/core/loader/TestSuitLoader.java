@@ -1,4 +1,4 @@
-package cz.osu.core;
+package cz.osu.core.loader;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -31,8 +31,12 @@ import org.springframework.stereotype.Component;
 @Component
 public final class TestSuitLoader {
 
-    @Inject
     private FileExceptionUtil exceptionUtil;
+
+    @Inject
+    public TestSuitLoader(FileExceptionUtil exceptionUtil) {
+        this.exceptionUtil = exceptionUtil;
+    }
 
     /**
      * Queue of files which contains selenium test/s.
@@ -96,4 +100,7 @@ public final class TestSuitLoader {
         this.files = files;
     }
 
+    public String getTestName() {
+        return files.peek().getName();
+    }
 }

@@ -23,6 +23,8 @@
     called from main method (auto component scan is not working in this case) -->
     <bean id="Composer" class="cz.osu.core.Composer"/>
 
-    <bean id="Robot" class="java.awt.Robot"/>
+    <bean id="Recorder" class="cz.osu.core.recorder.Recorder"/>
+
+    <bean id="Robot" class="java.awt.Robot" scope="prototype"/>
 
 </beans>

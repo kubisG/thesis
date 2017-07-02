@@ -24,10 +24,10 @@ public class TestSuitRunner {
         this.testCaseRunner = testCaseRunner;
     }
 
-    public void run(TestSuit testSuit) throws IOException, InterruptedException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException, AWTException {
+    public void run(TestSuit testSuit, String testSuitDir) throws IOException, InterruptedException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException, AWTException {
         // run all test cases
         while (testSuit.hasNextTestCase()) {
-            testCaseRunner.run(testSuit.getNextTestCase());
+            testCaseRunner.run(testSuit.getNextTestCase(), testSuitDir);
         }
     }
 }

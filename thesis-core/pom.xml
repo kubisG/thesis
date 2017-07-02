@@ -187,6 +187,13 @@
             <version>0.9.11</version>
         </dependency>
 
+        <!-- image to video dependency -->
+        <dependency>
+            <groupId>io.humble</groupId>
+            <artifactId>humble-video-all</artifactId>
+            <version>0.2.1</version>
+        </dependency>
+
     </dependencies>
 
     <build>

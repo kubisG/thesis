@@ -3,6 +3,7 @@ package cz.osu.core.action;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.Point;
+import org.openqa.selenium.SessionNotCreatedException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -43,8 +44,6 @@ public class MoveAction {
 
     private WebDriver driver;
 
-    private String previousUrl;
-
     private WebElement previousWebElement;
 
     @Inject
@@ -64,21 +63,13 @@ public class MoveAction {
         this.previousPosition = currentPosition;
     }
 
-    private void setPreviousUrl(String currentUrl) {
-        this.previousUrl = currentUrl;
-    }
-
-    private boolean urlChanged(String currentUrl) {
-        return (previousUrl != null && !this.previousUrl.equals(currentUrl)) ;
-    }
-
-    private boolean isAttachedToDOM(WebElement webElement) {
+    private boolean isAttachedToDOM() {
         boolean displayed = false;
         try {
             if (previousWebElement != null) {
                 displayed = previousWebElement.isDisplayed();
             }
-        } catch (NoSuchElementException | StaleElementReferenceException ex) {
+        } catch (NoSuchElementException | StaleElementReferenceException | SessionNotCreatedException ex) {
             displayed = false;
         }
         return displayed;
@@ -140,27 +131,19 @@ public class MoveAction {
     }
 
     private void moveToDefaultPosition(Point defaultPosition) {
-        String currentUrl = driver.getCurrentUrl();
-        if (!isAttachedToDOM(previousWebElement)) {
-            //robot.mouseMove(defaultPosition.getX(), defaultPosition.getY());
-            //setPreviousPosition(defaultPosition);
+        if (!isAttachedToDOM()) {
             mouseMove(defaultPosition);
         }
-        setPreviousUrl(currentUrl);
-
     }
 
-    public void move(WebElement webElement) throws AWTException, InterruptedException {
+    public void move(WebElement webElement) throws AWTException {
         Point webElementCenter = getWebElementCenter(webElement);
         // if url is changed then move to default position
         moveToDefaultPosition(defaultPosition);
-
         // if web element is not visible then scroll, otherwise do nothing
         scroll(webElement);
-
         // perform mouse move to center of web element
         mouseMove(webElementCenter);
-
         // set current web element to previous to be able check page reload and so on
         setPreviousWebElement(webElement);
     }

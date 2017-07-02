@@ -23,8 +23,12 @@ import org.springframework.stereotype.Component;
 @Component
 public final class TestSuitsProvider {
 
-    @Inject
     private FileExceptionUtil exceptionUtil;
+
+    @Inject
+    public TestSuitsProvider(FileExceptionUtil exceptionUtil) {
+        this.exceptionUtil = exceptionUtil;
+    }
 
     /**
      * Method creates and provides a file queue.

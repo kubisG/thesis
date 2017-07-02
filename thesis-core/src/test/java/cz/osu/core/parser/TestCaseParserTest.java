@@ -53,7 +53,7 @@ public class TestCaseParserTest {
         List<MethodCallExpr> expectedResult = null;
 
         // execute
-        TestCase actualResult = testCaseParser.parse(TestMethod.TEST_METHOD_BODY);
+        TestCase actualResult = testCaseParser.parse(TestMethod.TEST_METHOD);
 
         // verify
         assertThat(actualResult).isEqualTo(null);

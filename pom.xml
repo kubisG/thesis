@@ -8,7 +8,6 @@
   <modules>
     <module>thesis-api</module>
     <module>thesis-core</module>
-    <module>thesis-ui</module>
   </modules>
   <packaging>pom</packaging>
 

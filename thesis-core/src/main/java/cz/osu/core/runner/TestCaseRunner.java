@@ -8,14 +8,15 @@ import javax.inject.Inject;
 import java.awt.*;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.concurrent.CountDownLatch;
 
-import cz.osu.core.Recorder;
 import cz.osu.core.action.ActionFacade;
 import cz.osu.core.enums.ScopeType;
 import cz.osu.core.factory.WebDriverFactory;
 import cz.osu.core.model.Scope;
 import cz.osu.core.model.Statement;
 import cz.osu.core.model.TestCase;
+import cz.osu.core.recorder.Recorder;
 
 /**
  * Project: thesis
@@ -26,17 +27,37 @@ public class TestCaseRunner {
 
     private final StatementRunner statementRunner;
 
+    private final ActionFacade actionFacade;
+
     private final Recorder recorder;
 
-    private final ActionFacade actionFacade;
+    private Thread recorderThread;
 
     private WebDriver driver;
 
     @Inject
-    public TestCaseRunner(StatementRunner statementRunner, Recorder recorder, ActionFacade actionFacade) {
+    public TestCaseRunner(StatementRunner statementRunner, ActionFacade actionFacade, Recorder recorder) {
         this.statementRunner = statementRunner;
-        this.recorder = recorder;
         this.actionFacade = actionFacade;
+        this.recorder = recorder;
+    }
+
+    private void startRecord(String outputFile) throws InterruptedException {
+        // do some thread synchronization using latch
+        // main thread have to wait for runner thread
+        CountDownLatch latch = new CountDownLatch(1);
+        // set recorder
+        recorder.setOutputFile(outputFile);
+        recorder.setLatch(latch);
+        // create record thread
+        recorderThread = new Thread(recorder);
+        recorderThread.start();
+        // wait for record thread
+        latch.await();
+    }
+
+    private void stopRecord() {
+        recorderThread.interrupt();
     }
 
     private void startDriver(String driverName) throws IOException {
@@ -45,7 +66,7 @@ public class TestCaseRunner {
     }
 
     private void stopDriver() {
-        driver.quit();
+        driver.close();
     }
 
     private void setDriverAsScope(Statement statement) {
@@ -79,17 +100,24 @@ public class TestCaseRunner {
         }
     }
 
-    public void run(TestCase testCase) throws IOException, InterruptedException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, AWTException {
+    public void run(TestCase testCase, String testSuitDir) throws IOException, InterruptedException,
+                                            InvocationTargetException, NoSuchMethodException,
+                                            InstantiationException, IllegalAccessException, AWTException {
+
+        // build absolute path where we will export video with current test case
+        String absoluteFileName = testSuitDir.concat(testCase.getName()).concat(".avi");
+        // start recorder
+        startRecord(absoluteFileName);
         // start and set up driver
         startDriver(testCase.getDriverName());
         // prepare test case for running
         prepare(testCase);
         // perform each statement in testcase
         execute(testCase);
-        // wait 3 sec
-        Thread.sleep(5000);
         // stop driver and close all associated windows
         stopDriver();
+        // stop recorder
+        stopRecord();
     }
 
 }

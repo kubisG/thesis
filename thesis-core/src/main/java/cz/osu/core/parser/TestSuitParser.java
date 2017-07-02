@@ -29,6 +29,7 @@ import cz.osu.core.util.ClassFinderUtils;
 @Component
 public class TestSuitParser {
 
+    // TODO: 27. 6. 2017 will be removed
     private static final String MOCKED_JAR_LOCATION = "/C:/Users/Jakub/thesis/thesis-core/target/thesis-core-1.0-SNAPSHOT-jar-with-dependencies.jar";
 
     private final TestCaseParser testCaseParser;
@@ -57,14 +58,23 @@ public class TestSuitParser {
                 .collect(Collectors.toList());
     }
 
-    private List<BlockStmt> getTestCases(CompilationUnit compilationUnit) {
+    private boolean isTestIgnored(MethodDeclaration testCase) {
+        return testCase.getAnnotationByName(Annotations.IGNORE.getValue()).isPresent();
+    }
+
+    private BlockStmt getTestCaseBody(MethodDeclaration testCase) {
+        if(!testCase.getBody().isPresent()) {
+            return new BlockStmt();
+        }
+        return testCase.getBody().get();
+    }
+
+    private List<MethodDeclaration> getTestCases(CompilationUnit compilationUnit) {
         List<MethodDeclaration> testCases  =  filterMethodsByAnnotation(compilationUnit, Annotations.TEST);
 
         return testCases.stream()
                 .filter(md -> !isTestIgnored(md))
-                .map(md -> md.getBody())
-                .filter(obs -> obs.isPresent())
-                .map(obs -> obs.get())
+                .filter(md -> md.getBody().isPresent())
                 .collect(Collectors.toList());
     }
 
@@ -102,14 +112,11 @@ public class TestSuitParser {
         return ClassFinderUtils.getAvailableClassNames(MOCKED_JAR_LOCATION, packageNames);
     }
 
-    private boolean isTestIgnored(MethodDeclaration testCase) {
-        return testCase.getAnnotationByName(Annotations.IGNORE.getValue()).isPresent();
-    }
-
     public TestSuit parse(CompilationUnit compilationUnit) {
         TestSuit testSuit = new TestSuit();
         // get test cases for current test suit
-        List<BlockStmt> testCases = getTestCases(compilationUnit);
+        List<MethodDeclaration> testCases = getTestCases(compilationUnit);
+
         // set up binding resolver
         bindingResolver.clearCache();
         bindingResolver.setFields(getFields(compilationUnit));
@@ -120,8 +127,8 @@ public class TestSuitParser {
         classResolver.setAvailableClassNames(getAvailableClassNames(compilationUnit));
 
         // parse all test cases
-        for (BlockStmt testCase : testCases) {
-            bindingResolver.setTestCase(testCase);
+        for (MethodDeclaration testCase : testCases) {
+            bindingResolver.setTestCase(getTestCaseBody(testCase));
             testSuit.addTestCase(testCaseParser.parse(testCase));
         }
         return testSuit;
