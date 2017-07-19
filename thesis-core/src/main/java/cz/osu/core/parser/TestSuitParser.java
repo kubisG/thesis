@@ -17,9 +17,8 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 
 import cz.osu.core.enums.Annotations;
 import cz.osu.core.model.TestSuit;
-import cz.osu.core.parser.TestCaseParser;
-import cz.osu.core.resolver.BindingResolver;
-import cz.osu.core.resolver.ClassResolver;
+import cz.osu.core.parser.resolver.BindingResolver;
+import cz.osu.core.parser.resolver.ClassResolver;
 import cz.osu.core.util.ClassFinderUtils;
 
 /**
@@ -30,7 +29,7 @@ import cz.osu.core.util.ClassFinderUtils;
 public class TestSuitParser {
 
     // TODO: 27. 6. 2017 will be removed
-    private static final String MOCKED_JAR_LOCATION = "/C:/Users/Jakub/thesis/thesis-core/target/thesis-core-1.0-SNAPSHOT-jar-with-dependencies.jar";
+    private static final String MOCKED_JAR_LOCATION = "/C:/Users/Jakub/thesis/thesis-core/target/UserDocumentationMaker.jar";
 
     private final TestCaseParser testCaseParser;
 

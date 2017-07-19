@@ -10,9 +10,9 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.CountDownLatch;
 
-import cz.osu.core.action.ActionFacade;
+import cz.osu.core.runner.action.ActionFacade;
 import cz.osu.core.enums.ScopeType;
-import cz.osu.core.factory.WebDriverFactory;
+import cz.osu.core.runner.factory.WebDriverFactory;
 import cz.osu.core.model.Scope;
 import cz.osu.core.model.Statement;
 import cz.osu.core.model.TestCase;
@@ -107,7 +107,7 @@ public class TestCaseRunner {
         // build absolute path where we will export video with current test case
         String absoluteFileName = testSuitDir.concat(testCase.getName()).concat(".avi");
         // start recorder
-        startRecord(absoluteFileName);
+        //startRecord(absoluteFileName);
         // start and set up driver
         startDriver(testCase.getDriverName());
         // prepare test case for running
@@ -117,7 +117,7 @@ public class TestCaseRunner {
         // stop driver and close all associated windows
         stopDriver();
         // stop recorder
-        stopRecord();
+        //stopRecord();
     }
 
 }

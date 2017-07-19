@@ -1,20 +1,10 @@
-package cz.osu.core.resolver;
+package cz.osu.core.parser.resolver;
 
-import org.reflections.Reflections;
-import org.reflections.scanners.ResourcesScanner;
-import org.reflections.scanners.SubTypesScanner;
-import org.reflections.scanners.TypeAnnotationsScanner;
-import org.reflections.util.ClasspathHelper;
-import org.reflections.util.ConfigurationBuilder;
-import org.reflections.util.FilterBuilder;
 import org.springframework.stereotype.Component;
 
-import java.sql.Ref;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,7 +33,7 @@ public class ClassResolver {
         this.availableClassNames = availableClassNames;
     }
 
-    private String findScopeClassNameInJar(String scopeClassName) {
+    private String findClassNameInJar(String scopeClassName) {
         return availableClassNames.get(scopeClassName);
     }
 
@@ -52,7 +42,7 @@ public class ClassResolver {
         return matcher.matches();
     }
 
-    private Optional<String> findScopeClassNameInImports(String scopeClassName) {
+    private Optional<String> findClassNameInImports(String scopeClassName) {
         return imports.stream()
                 .map(impt -> impt.getNameAsString())
                 .filter(importName -> importName.contains(scopeClassName))
@@ -80,10 +70,10 @@ public class ClassResolver {
 
         if (isFullyQualifiedName(scopeExprName)) {
             scopeClassName = scopeExprName;
-        } else if ((tmpScopeClassName = findScopeClassNameInImports(scopeExprName)).isPresent()) {
+        } else if ((tmpScopeClassName = findClassNameInImports(scopeExprName)).isPresent()) {
             scopeClassName = tmpScopeClassName.get();
         } else {
-            scopeClassName = findScopeClassNameInJar(scopeExprName);
+            scopeClassName = findClassNameInJar(scopeExprName);
         }
 
         try {

@@ -1,4 +1,4 @@
-package cz.osu.core.facade;
+package cz.osu.core.runner.facade;
 
 import com.google.common.collect.ImmutableMap;
 import org.springframework.stereotype.Component;
@@ -10,9 +10,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
 import cz.osu.core.model.Statement;
-import cz.osu.core.strategy.execution.ExecutionStrategy;
-import cz.osu.core.strategy.execution.ExecutionWithAction;
-import cz.osu.core.strategy.execution.ExecutionWithoutAction;
+import cz.osu.core.runner.strategy.execution.ExecutionStrategy;
+import cz.osu.core.runner.strategy.execution.ExecutionWithAction;
+import cz.osu.core.runner.strategy.execution.ExecutionWithoutAction;
 
 /**
  * Project: thesis

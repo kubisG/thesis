@@ -1,21 +1,20 @@
-package cz.osu.core.facade;
+package cz.osu.core.runner.facade;
 
 import com.google.common.collect.ImmutableMap;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
 
-import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
 import cz.osu.core.enums.ScopeType;
 import cz.osu.core.model.Method;
 import cz.osu.core.model.Scope;
-import cz.osu.core.strategy.evaluation.ClassLevelEvaluation;
-import cz.osu.core.strategy.evaluation.CreationLevelEvaluation;
-import cz.osu.core.strategy.evaluation.EvaluationStrategy;
-import cz.osu.core.strategy.evaluation.InstanceLevelEvaluation;
+import cz.osu.core.runner.strategy.evaluation.ClassLevelEvaluation;
+import cz.osu.core.runner.strategy.evaluation.CreationLevelEvaluation;
+import cz.osu.core.runner.strategy.evaluation.EvaluationStrategy;
+import cz.osu.core.runner.strategy.evaluation.InstanceLevelEvaluation;
 
 /**
  * Project: thesis

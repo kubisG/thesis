@@ -142,25 +142,7 @@ public final class Recorder implements Runnable {
         muxer.close();
     }
 
-    /*private void prepareForRecording() throws AWTException, IOException {
-        final Toolkit toolkit = Toolkit.getDefaultToolkit();
-        final Rectangle screenBounds = new Rectangle(toolkit.getScreenSize());
-        final Rational frameRate = Rational.make(1, SNAPS_PER_SECOND);
-        final Muxer muxer = Muxer.make(outputFile, null, VIDEO_FORMAT);
-        // formats
-        final MuxerFormat format = muxer.getFormat();
-        final PixelFormat.Type pixelFormat = PixelFormat.Type.PIX_FMT_YUV420P;
-        final MediaPacket packet = MediaPacket.make();
-        // create and set encoder
-        final Encoder encoder = createEncoder(format);
-        setEncoder(encoder, screenBounds, frameRate, pixelFormat, format);
-
-        final MediaPicture picture = MediaPicture.make(encoder.getWidth(), encoder.getHeight(), pixelFormat);
-        // create converter
-        MediaPictureConverter converter = createConverter(screenBounds, picture);
-    }*/
-
-    public void record(int screenNumber, Rectangle screenBounds, Muxer muxer,
+    private void record(int screenNumber, Rectangle screenBounds, Muxer muxer,
                        Encoder encoder, MediaPictureConverter converter,
                        MediaPicture picture, MediaPacket packet, Rational frameRate) throws IOException, InterruptedException {
         // Make the screen capture, add mouse cursor and convert image to TYPE_3BYTE_BGR
@@ -170,7 +152,7 @@ public final class Recorder implements Runnable {
         // encode current picture
         encode(encoder, picture, packet, muxer);
 
-        /** now we'll sleep until it's time to take the next snapshot. */
+        // now we'll sleep until it's time to take the next snapshot.
         System.out.println("Cycle ----------------------------- RECORD -------------------------: " + screenNumber);
         Thread.sleep((long) (1000 * frameRate.getDouble()));
     }

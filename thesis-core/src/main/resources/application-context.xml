@@ -21,10 +21,12 @@
 
     <!-- application start point which needs to be defined here because of getBean() method
     called from main method (auto component scan is not working in this case) -->
-    <bean id="Composer" class="cz.osu.core.Composer"/>
+    <bean id="userDocumentationMaker" class="cz.osu.core.UserDocumentationMaker"/>
 
-    <bean id="Recorder" class="cz.osu.core.recorder.Recorder"/>
+    <bean id="configLoader" class="cz.osu.core.loader.ConfigLoader"/>
 
-    <bean id="Robot" class="java.awt.Robot" scope="prototype"/>
+    <bean id="recorder" class="cz.osu.core.recorder.Recorder"/>
+
+    <bean id="robot" class="java.awt.Robot" scope="prototype"/>
 
 </beans>

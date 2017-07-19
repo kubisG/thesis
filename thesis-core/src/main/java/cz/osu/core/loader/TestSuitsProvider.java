@@ -1,4 +1,4 @@
-package cz.osu.core;
+package cz.osu.core.loader;
 
 import java.io.File;
 import java.util.Collection;

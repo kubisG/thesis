@@ -1,18 +1,13 @@
-package cz.osu.core.strategy.evaluation;
+package cz.osu.core.runner.strategy.evaluation;
 
 import org.springframework.stereotype.Component;
 
-import java.lang.management.OperatingSystemMXBean;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Member;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import cz.osu.core.model.Method;
 import cz.osu.core.model.Scope;
-import cz.osu.core.strategy.evaluation.EvaluationStrategy;
 
 /**
  * Project: thesis

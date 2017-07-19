@@ -8,14 +8,11 @@ import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
-import cz.osu.core.enums.ScopeType;
-import cz.osu.core.facade.EvaluationFacade;
-import cz.osu.core.facade.ExecutionFacade;
+import cz.osu.core.runner.facade.EvaluationFacade;
+import cz.osu.core.runner.facade.ExecutionFacade;
 import cz.osu.core.model.Method;
 import cz.osu.core.model.Statement;
 import cz.osu.core.model.Variable;
-import cz.osu.core.strategy.evaluation.EvaluationStrategy;
-import cz.osu.core.strategy.execution.ExecutionStrategy;
 
 /**
  * Project: thesis

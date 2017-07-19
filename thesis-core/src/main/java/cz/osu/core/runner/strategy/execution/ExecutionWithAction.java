@@ -1,4 +1,4 @@
-package cz.osu.core.strategy.execution;
+package cz.osu.core.runner.strategy.execution;
 
 import org.openqa.selenium.WebElement;
 import org.springframework.stereotype.Component;
@@ -8,12 +8,10 @@ import javax.inject.Inject;
 import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
 
-import cz.osu.core.action.ActionFacade;
-import cz.osu.core.enums.ScopeType;
-import cz.osu.core.facade.EvaluationFacade;
+import cz.osu.core.runner.action.ActionFacade;
+import cz.osu.core.runner.facade.EvaluationFacade;
 import cz.osu.core.model.Method;
 import cz.osu.core.model.Statement;
-import cz.osu.core.strategy.evaluation.EvaluationStrategy;
 
 /**
  * Project: thesis

@@ -1,9 +1,7 @@
-package cz.osu.core.action;
+package cz.osu.core.runner.action;
 
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;

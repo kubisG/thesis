@@ -5,11 +5,11 @@ import javax.inject.Inject;
 import cz.osu.core.exception.FileLoaderException;
 import cz.osu.core.exception.FileProviderException;
 import cz.osu.core.loader.TestSuitLoader;
+import cz.osu.core.loader.TestSuitsProvider;
 import cz.osu.core.model.TestSuit;
 import cz.osu.core.parser.TestSuitParser;
 import cz.osu.core.runner.TestSuitRunner;
 
-import org.apache.commons.io.FileUtils;
 import org.springframework.stereotype.Component;
 
 import java.awt.*;
@@ -29,7 +29,7 @@ import com.github.javaparser.ast.CompilationUnit;
  */
 
 @Component
-public class Composer {
+public class UserDocumentationMaker {
 
     private final TestSuitLoader testSuitLoader;
 
@@ -40,7 +40,7 @@ public class Composer {
     private final TestSuitRunner testSuitRunner;
 
     @Inject
-    public Composer(TestSuitLoader testSuitLoader, TestSuitsProvider testSuitsProvider, TestSuitParser testSuitParser, TestSuitRunner testSuitRunner) {
+    public UserDocumentationMaker(TestSuitLoader testSuitLoader, TestSuitsProvider testSuitsProvider, TestSuitParser testSuitParser, TestSuitRunner testSuitRunner) {
         this.testSuitLoader = testSuitLoader;
         this.testSuitsProvider = testSuitsProvider;
         this.testSuitParser = testSuitParser;

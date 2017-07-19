@@ -18,7 +18,6 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithArguments;
-import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 
 import cz.osu.core.enums.Action;
@@ -26,13 +25,12 @@ import cz.osu.core.enums.ExpressionType;
 import cz.osu.core.enums.ScopeType;
 import cz.osu.core.enums.WebDriverType;
 import cz.osu.core.model.Method;
-import cz.osu.core.model.Parameter;
 import cz.osu.core.model.Scope;
 import cz.osu.core.model.Statement;
 import cz.osu.core.model.TestCase;
 import cz.osu.core.model.Variable;
-import cz.osu.core.resolver.BindingResolver;
-import cz.osu.core.resolver.ClassResolver;
+import cz.osu.core.parser.resolver.BindingResolver;
+import cz.osu.core.parser.resolver.ClassResolver;
 
 /**
  * Project: thesis
