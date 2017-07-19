@@ -27,7 +27,7 @@ public class MoveAction {
 
     private static final int SCROLL_UP = -1;
 
-    private static final int NUMBER_OF_STEPS = 15000;
+    private static final int NUMBER_OF_STEPS = 30000;
 
     // TODO: 22. 6. 2017 change according to screen resolution (currently is set on ntb resolution)
     private int screenWidth = 1366;

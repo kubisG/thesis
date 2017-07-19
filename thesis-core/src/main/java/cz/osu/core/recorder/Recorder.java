@@ -33,13 +33,15 @@ public final class Recorder implements Runnable {
     private static final String VIDEO_FORMAT = "AVI";
 
     // TODO: 28. 6. 2017 add it to resources
-    private static final String MOUSE_CURSOR_PATH = "C:\\Users\\Jakub\\cursor_2.png";
+    private static final String MOUSE_CURSOR_PATH = "C:\\Users\\Jakub\\cursor_5.png";
 
     private final Robot robot;
 
     private String outputFile;
 
     private CountDownLatch latch;
+
+    private volatile boolean running;
 
     @Inject
     public Recorder(Robot robot) {
@@ -52,6 +54,10 @@ public final class Recorder implements Runnable {
 
     public void setLatch(CountDownLatch latch) {
         this.latch = latch;
+    }
+
+    public void stopRecording() {
+        running = false;
     }
 
     //Convert a BufferedImage of any type, to BufferedImage of a specified type.
@@ -182,17 +188,22 @@ public final class Recorder implements Runnable {
         // release parent thread to start browser
         latch.countDown();
 
+        // set flag
+        running = true;
+
         // all components have been set, let's do the recording
-        while (!Thread.interrupted()) {
+        while (running) {
             try {
                 record(screenNumber, screenBounds, muxer, encoder, converter, picture, packet, frameRate);
             } catch (IOException | InterruptedException e) {
                 // clean up
                 closeMuxer(encoder, muxer, packet);
-                Thread.currentThread().interrupt();
+                running = false;
             }
             // increment screen number
             screenNumber++;
         }
+        // clean up
+        closeMuxer(encoder, muxer, packet);
     }
 }
