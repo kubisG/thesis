@@ -1,4 +1,4 @@
-package cz.osu.core.runner.strategy.execution;
+package cz.osu.core.runner.facade.strategy.execution;
 
 import org.springframework.stereotype.Component;
 

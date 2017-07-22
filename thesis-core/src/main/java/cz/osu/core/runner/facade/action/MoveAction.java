@@ -1,4 +1,4 @@
-package cz.osu.core.runner.action;
+package cz.osu.core.runner.facade.action;
 
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
@@ -27,7 +27,11 @@ public class MoveAction {
 
     private static final int SCROLL_UP = -1;
 
-    private static final int NUMBER_OF_STEPS = 30000;
+    private static final int NUMBER_OF_STEPS_LD = 30000;
+
+    private static final int NUMBER_OF_STEPS_SD = 15000;
+
+    private static final int NUMBER_OF_STEPS_VSD = 9000;
 
     // TODO: 22. 6. 2017 change according to screen resolution (currently is set on ntb resolution)
     private int screenWidth = 1366;
@@ -112,18 +116,36 @@ public class MoveAction {
         }
     }
 
-    private int calculateCoordinate(int startCoordinate, int endCoordinate, int step, int offset) {
-        return (startCoordinate * (NUMBER_OF_STEPS - step) / NUMBER_OF_STEPS)
-                + (((endCoordinate + offset) * step) / NUMBER_OF_STEPS);
+    private double calculateDistance(int x1, int x2, int y1, int y2) {
+        return Math.hypot(x2 - x1, y2 - y1);
+    }
+
+    private int getNumberOfSteps(Point previousPosition, Point currentPosition) {
+        double distance = calculateDistance(previousPosition.getX(), currentPosition.getX(),
+                previousPosition.getY(), currentPosition.getY());
+
+        if (distance < 150) {
+            return NUMBER_OF_STEPS_VSD;
+        } else if (distance > 150 && distance < 300) {
+            return NUMBER_OF_STEPS_SD;
+        }
+        return NUMBER_OF_STEPS_LD;
+    }
+
+    private int calculateCoordinate(int numberOfSteps, int startCoordinate, int endCoordinate, int step, int offset) {
+        return (startCoordinate * (numberOfSteps - step) / numberOfSteps)
+                + (((endCoordinate + offset) * step) / numberOfSteps);
     }
 
     private void mouseMove(Point currentPosition) {
         int currentX = 0;
         int currentY = 0;
 
-        for (int i = 0; i < NUMBER_OF_STEPS; i++) {
-            currentX = calculateCoordinate(previousPosition.getX(), currentPosition.getX(), i,0);
-            currentY = calculateCoordinate(previousPosition.getY(), currentPosition.getY(), i, DEFAULT_OFFSET);
+        int numberOfSteps = getNumberOfSteps(previousPosition, currentPosition);
+
+        for (int i = 0; i < numberOfSteps; i++) {
+            currentX = calculateCoordinate(numberOfSteps, previousPosition.getX(), currentPosition.getX(), i,0);
+            currentY = calculateCoordinate(numberOfSteps, previousPosition.getY(), currentPosition.getY(), i, DEFAULT_OFFSET);
             robot.mouseMove(currentX, currentY);
         }
         robot.delay(1000);

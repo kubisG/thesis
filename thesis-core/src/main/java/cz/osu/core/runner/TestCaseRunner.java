@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.CountDownLatch;
 
-import cz.osu.core.runner.action.ActionFacade;
+import cz.osu.core.runner.facade.action.ActionFacade;
 import cz.osu.core.enums.ScopeType;
 import cz.osu.core.runner.factory.WebDriverFactory;
 import cz.osu.core.model.Scope;
@@ -65,7 +65,8 @@ public class TestCaseRunner {
         actionFacade.setDriver(driver);
     }
 
-    private void stopDriver() {
+    private void stopDriver() throws InterruptedException{
+        Thread.sleep(2000);
         driver.close();
     }
 
@@ -88,6 +89,7 @@ public class TestCaseRunner {
                 .forEach(this::setStatementScope);
     }
 
+    // TODO: 19. 7. 2017 podivat se na to protoze se spatne setuje driver kdyz je jako parametr nejake metody viz zezula_4.java
     private void prepare(TestCase testCase) {
         testCase.getStatements().stream()
                 .filter(statement -> statement.getFirstMethod().getScope().getScopeType().equals(ScopeType.DRIVER_INSTANCE))
@@ -107,7 +109,7 @@ public class TestCaseRunner {
         // build absolute path where we will export video with current test case
         String absoluteFileName = testSuitDir.concat(testCase.getName()).concat(".avi");
         // start recorder
-        startRecord(absoluteFileName);
+        //startRecord(absoluteFileName);
         // start and set up driver
         startDriver(testCase.getDriverName());
         // prepare test case for running
@@ -117,7 +119,7 @@ public class TestCaseRunner {
         // stop driver and close all associated windows
         stopDriver();
         // stop recorder
-        stopRecord();
+        //stopRecord();
     }
 
 }

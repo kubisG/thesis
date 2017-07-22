@@ -1,4 +1,4 @@
-package cz.osu.core.runner.strategy.execution;
+package cz.osu.core.runner.facade.strategy.execution;
 
 import java.awt.*;
 import java.lang.reflect.InvocationTargetException;

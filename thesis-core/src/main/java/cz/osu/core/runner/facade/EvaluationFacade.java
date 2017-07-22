@@ -11,10 +11,10 @@ import java.util.Map;
 import cz.osu.core.enums.ScopeType;
 import cz.osu.core.model.Method;
 import cz.osu.core.model.Scope;
-import cz.osu.core.runner.strategy.evaluation.ClassLevelEvaluation;
-import cz.osu.core.runner.strategy.evaluation.CreationLevelEvaluation;
-import cz.osu.core.runner.strategy.evaluation.EvaluationStrategy;
-import cz.osu.core.runner.strategy.evaluation.InstanceLevelEvaluation;
+import cz.osu.core.runner.facade.strategy.evaluation.ClassLevelEvaluation;
+import cz.osu.core.runner.facade.strategy.evaluation.CreationLevelEvaluation;
+import cz.osu.core.runner.facade.strategy.evaluation.EvaluationStrategy;
+import cz.osu.core.runner.facade.strategy.evaluation.InstanceLevelEvaluation;
 
 /**
  * Project: thesis

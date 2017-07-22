@@ -71,6 +71,8 @@ public class StatementRunner {
     }
 
     public void run(Statement statement) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, InterruptedException, AWTException {
+        // wait for a DOM update after Ajax call
+        Thread.sleep(2000);
         // evaluate parameters for all methods in statement
         prepare(statement);
         // perform action

@@ -1,4 +1,4 @@
-package cz.osu.core.runner.strategy.execution;
+package cz.osu.core.runner.facade.strategy.execution;
 
 import org.openqa.selenium.WebElement;
 import org.springframework.stereotype.Component;
@@ -8,7 +8,7 @@ import javax.inject.Inject;
 import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
 
-import cz.osu.core.runner.action.ActionFacade;
+import cz.osu.core.runner.facade.action.ActionFacade;
 import cz.osu.core.runner.facade.EvaluationFacade;
 import cz.osu.core.model.Method;
 import cz.osu.core.model.Statement;
@@ -45,11 +45,8 @@ public class ExecutionWithAction implements ExecutionStrategy {
     public void execute(Statement statement) throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException, AWTException, InterruptedException {
         // evaluate part of statement to set action method scope
         Method actionMethod = evaluate(statement);
-        // apply move and highlight action on webElement (scopeValue equals webElement)
-        Object webElement = actionMethod.getScope().getScopeValue();
-        actionFacade.apply((WebElement) webElement);
-        // evaluate the rest part of statement (finish action)
-        evaluationFacade.evaluate(actionMethod);
+        // apply highlight with move or keydown action on webElement (scopeValue equals webElement)
+        actionFacade.apply(actionMethod);
     }
 }
 

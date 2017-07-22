@@ -29,6 +29,7 @@ public class App {
                                                     InterruptedException, InstantiationException,
                                                     AWTException, FileLoaderException,
                                                     IllegalAccessException, InvocationTargetException {
+
         LOGGER.debug("----------- Start of application ------------- " + args[0]);
         System.out.println("----------------------- : " + args[0]);
         // load application context

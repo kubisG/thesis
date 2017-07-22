@@ -34,7 +34,7 @@ public class WebDriverFactory {
         WebDriver driver = null;
 
         if (WebDriverType.FIREFOX_DRIVER.equals(driverName)) {
-            System.setProperty("webdriver.gecko.driver", getDriverPath(FIREFOX_DRIVER_PATH));
+            System.setProperty("webdriver.gecko.driver", PATH);
             driver = new FirefoxDriver();
             // always start with maximize browser window
             driver.manage().window().maximize();

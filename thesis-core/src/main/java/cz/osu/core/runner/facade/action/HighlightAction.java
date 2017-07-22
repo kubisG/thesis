@@ -1,4 +1,4 @@
-package cz.osu.core.runner.action;
+package cz.osu.core.runner.facade.action;
 
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
