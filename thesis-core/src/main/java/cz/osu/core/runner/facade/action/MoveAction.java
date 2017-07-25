@@ -33,16 +33,13 @@ public class MoveAction {
 
     private static final int NUMBER_OF_STEPS_VSD = 9000;
 
-    // TODO: 22. 6. 2017 change according to screen resolution (currently is set on ntb resolution)
-    private int screenWidth = 1366;
+    private int screenWidth;
 
-    // TODO: 22. 6. 2017 change according to screen resolution (currently is set on ntb resolution)
-    private int screenHeight = 768;
+    private int screenHeight;
 
-    // TODO: 22. 6. 2017 change according to screen resolution (currently is set on ntb resolution)
-    private Point defaultPosition = new Point(((screenWidth / 2) - DEFAULT_OFFSET), (screenHeight - (2 * DEFAULT_OFFSET)));
+    private Point defaultPosition;
 
-    private Point previousPosition = new Point((screenWidth / 2), (screenHeight / 2));
+    private Point previousPosition;
 
     private final Robot robot;
 
@@ -53,6 +50,7 @@ public class MoveAction {
     @Inject
     public MoveAction(Robot robot) {
         this.robot = robot;
+        initializeScreenBoundsAndPositions();
     }
 
     public void setDriver(WebDriver driver) {
@@ -77,6 +75,17 @@ public class MoveAction {
             displayed = false;
         }
         return displayed;
+    }
+
+    private void initializeScreenBoundsAndPositions() {
+        final Toolkit toolkit = Toolkit.getDefaultToolkit();
+        final Rectangle screenBounds = new Rectangle(toolkit.getScreenSize());
+        // init screen size
+        this.screenWidth = screenBounds.width;
+        this.screenHeight = screenBounds.height;
+        // init default and previous position
+        this.defaultPosition = new Point(((screenWidth / 2) - DEFAULT_OFFSET), (screenHeight - (2 * DEFAULT_OFFSET)));
+        this.previousPosition = new Point((screenWidth / 2), (screenHeight / 2));
     }
 
     private boolean isVisible(WebElement webElement) {

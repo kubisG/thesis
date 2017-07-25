@@ -24,12 +24,6 @@ public class InstanceLevelEvaluation implements EvaluationStrategy {
         Class<?> clazz = scope.getScopeValue().getClass();
 
         java.lang.reflect.Method clazzMethod = getMethod(clazz, method.getName(), method.getParameterClasses());
-        CharSequence prd = null;
-        if (method.getParameterClasses().length != 0 && method.getName().equals("sendKeys") ) {
-            /*List<Character> list = Arrays.asList('foo', "bar", "waa");
-            CharSequence[] cs = list.toArray(new CharSequence[list.size()]);*/
-            return clazzMethod.invoke(scope.getScopeValue(), "dsadfas");
-        }
         return clazzMethod.invoke(scope.getScopeValue(), method.getParametersAsObjects());
     }
 

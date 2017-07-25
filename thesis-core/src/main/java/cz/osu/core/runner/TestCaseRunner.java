@@ -31,8 +31,6 @@ public class TestCaseRunner {
 
     private final Recorder recorder;
 
-    private Thread recorderThread;
-
     private WebDriver driver;
 
     @Inject
@@ -50,7 +48,7 @@ public class TestCaseRunner {
         recorder.setOutputFile(outputFile);
         recorder.setLatch(latch);
         // create record thread
-        recorderThread = new Thread(recorder);
+        Thread recorderThread = new Thread(recorder);
         recorderThread.start();
         // wait for record thread
         latch.await();
@@ -109,7 +107,7 @@ public class TestCaseRunner {
         // build absolute path where we will export video with current test case
         String absoluteFileName = testSuitDir.concat(testCase.getName()).concat(".avi");
         // start recorder
-        //startRecord(absoluteFileName);
+        startRecord(absoluteFileName);
         // start and set up driver
         startDriver(testCase.getDriverName());
         // prepare test case for running
@@ -119,7 +117,7 @@ public class TestCaseRunner {
         // stop driver and close all associated windows
         stopDriver();
         // stop recorder
-        //stopRecord();
+        stopRecord();
     }
 
 }

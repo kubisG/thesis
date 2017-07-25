@@ -73,7 +73,7 @@ public class ConfigLoader {
                     mappedPaths.put(key, value);
                 }
             }
-        } catch (SAXException | DOMException | IOException | URISyntaxException |
+        } catch (SAXException | DOMException | IOException |
                 XPathExpressionException | ParserConfigurationException ex) {
             // LOGGER.debug(ExceptionMessage.CONFIG_XML_FAIL);
             LOGGER.trace("Inner message: ", ex);
@@ -83,7 +83,7 @@ public class ConfigLoader {
         return mappedPaths;
     }
 
-    private String getConfigPath(String configPath) throws URISyntaxException {
+    private String getConfigPath(String configPath) throws IOException {
         if (!DEFAULT_BATCH_CONFIG_PATH.equals(configPath)) {
             return configPath;
         }

@@ -20,9 +20,6 @@ import cz.osu.core.util.PathBuilderUtils;
  */
 public class WebDriverFactory {
 
-    // TODO: 19. 7. 2017 mock
-    private static final String PATH = "C:\\Users\\Jakub\\UserDocumentationMaker\\drivers\\geckodriver.exe";
-
     private static final String FIREFOX_DRIVER_PATH = "geckodriver.exe";
 
     private static final String CHROME_DRIVER_PATH = "chromedriver.exe";
@@ -34,7 +31,7 @@ public class WebDriverFactory {
         WebDriver driver = null;
 
         if (WebDriverType.FIREFOX_DRIVER.equals(driverName)) {
-            System.setProperty("webdriver.gecko.driver", PATH);
+            System.setProperty("webdriver.gecko.driver", getDriverPath(FIREFOX_DRIVER_PATH));
             driver = new FirefoxDriver();
             // always start with maximize browser window
             driver.manage().window().maximize();
@@ -56,10 +53,6 @@ public class WebDriverFactory {
     }
 
     private static String getDriverPath(String driverName) throws IOException {
-        try {
-            return PathBuilderUtils.buildPath("drivers", driverName);
-        } catch (URISyntaxException e) {
-            throw new IOException("Bad URI, cannot find path to driver", e);
-        }
+        return PathBuilderUtils.buildPath("drivers", driverName);
     }
 }

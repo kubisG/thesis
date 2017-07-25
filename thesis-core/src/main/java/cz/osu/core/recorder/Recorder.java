@@ -19,7 +19,10 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.concurrent.CountDownLatch;
+
+import cz.osu.core.util.PathBuilderUtils;
 
 /**
  * Project: thesis
@@ -32,8 +35,7 @@ public final class Recorder implements Runnable {
 
     private static final String VIDEO_FORMAT = "AVI";
 
-    // TODO: 28. 6. 2017 add it to resources
-    private static final String MOUSE_CURSOR_PATH = "C:\\Users\\Jakub\\cursor_5.png";
+    private static final String MOUSE_CURSOR = "cursor_5.png";
 
     private final Robot robot;
 
@@ -75,7 +77,8 @@ public final class Recorder implements Runnable {
 
     // add mouse cursor into current image
     private void addMouseCursor(BufferedImage screenCapture) throws IOException {
-        Image cursor = ImageIO.read(new File(MOUSE_CURSOR_PATH));
+        String cursorPath = PathBuilderUtils.buildPath("cursor", MOUSE_CURSOR);
+        Image cursor = ImageIO.read(new File(cursorPath));
         int x = MouseInfo.getPointerInfo().getLocation().x;
         int y = MouseInfo.getPointerInfo().getLocation().y;
 
